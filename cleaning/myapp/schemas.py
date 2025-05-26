@@ -1,7 +1,7 @@
-# import graphene
+import graphene
 
-# class Query(graphene.ObjectType):
-#     hello = graphene.String(name=graphene.String(default_value="stranger"))
+class Query(graphene.ObjectType):
+    hello = graphene.String(name=graphene.String(default_value="stranger"))
 
-#     def resolve_hello(self, info, name):
-#         return f"Hello, {name}!"
+    def resolve_hello(self, info, name):
+        return f"Hello, {name}!"
