@@ -15,7 +15,6 @@ class UserType(DjangoObjectType):
 class RegisterUser(graphene.Mutation):
     user = graphene.Field(UserType)
     token = graphene.String()
-    refresh_token = graphene.String()
     message = graphene.String()
     success = graphene.Boolean()
 
@@ -48,7 +47,6 @@ class RegisterUser(graphene.Mutation):
         return RegisterUser(
             user=user,
             token=token,
-            refresh_token=refresh_token,
             message="User registered successfully.",
             success=True
         )
