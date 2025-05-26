@@ -1,4 +1,5 @@
 import graphene
+from .views import *
 
 class Query(graphene.ObjectType):
     hello = graphene.String(name=graphene.String(default_value="stanger"))
