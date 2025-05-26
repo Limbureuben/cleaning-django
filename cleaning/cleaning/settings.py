@@ -139,7 +139,19 @@ REST_FRAMEWORK = {
 
 
 GRAPHENE = {
-    'SCHEMA': 'cleaning.schema.schema',  # Replace 'projectname' with your project name
+    'SCHEMA': 'myapp.schema.schema',
+    'GRAPHIQL': True,
+    'MIDDLEWARE': [
+        'graphql_jwt.middleware.JSONWebTokenMiddleware',
+    ],
+}
+
+GRAPHENE_JWT = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=10),
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    'JWT_VERIFY_EXPIRATION': True,  # Enforce token expiration checks
+    'JWT_LONG_RUNNING_REFRESH_TOKEN': True,
 }
 
 AUTHENTICATION_BACKENDS = [
