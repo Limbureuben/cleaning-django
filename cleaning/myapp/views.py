@@ -42,7 +42,6 @@ class RegisterUser(graphene.Mutation):
         user.save()
 
         token = get_token(user)
-        refresh_token = create_refresh_token(user)
 
         return RegisterUser(
             user=user,
