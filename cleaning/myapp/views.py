@@ -54,7 +54,6 @@ class RegisterUser(graphene.Mutation):
 class LoginUser(graphene.Mutation):
     user = graphene.Field(UserType)
     token = graphene.String()
-    refresh_token = graphene.String()
     message = graphene.String()
     success = graphene.Boolean()
 
@@ -71,12 +70,10 @@ class LoginUser(graphene.Mutation):
             )
 
         token = get_token(user)
-        refresh_token = create_refresh_token(user)
 
         return LoginUser(
             user=user,
             token=token,
-            refresh_token=refresh_token,
             message="Login successful.",
             success=True
         )
