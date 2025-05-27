@@ -3,7 +3,7 @@ from django.db import models
 
 # Create your models here.
 class Company(models.Model):
-    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    company_id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     company_name= models.CharField(max_length=100,null=False,blank=False)
     region_located=models.CharField(max_length=100,null=False,blank=False)
     location=models.CharField(max_length=50,null=False,blank=False)
@@ -28,7 +28,7 @@ class Company(models.Model):
     
 
 class Employee(models.Model):
-    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    employee_id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='employees')
     employee_name = models.CharField(max_length=255)
     employee_email = models.EmailField()
@@ -41,7 +41,7 @@ class Employee(models.Model):
     def __str__(self):
         return self.employee_name
 class Service(models.Model):
-    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    service_id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='services')
     name = models.CharField(max_length=255) 
     hourly_rate = models.DecimalField(max_digits=7, decimal_places=2)
@@ -49,10 +49,10 @@ class Service(models.Model):
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.name} - {self.company.name}"
+        return f"{self.name} - {self.company.company_name}"
     
 class Customer(models.Model):
-    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    customer_id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     customer_name = models.CharField(max_length=255)
     customer_email = models.EmailField(unique=True)
     customer_phonenumber = models.CharField(max_length=20)
@@ -71,7 +71,7 @@ class Booking(models.Model):
         ("cancelled", "Cancelled"),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    booking_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     service = models.ManyToManyField(Service)
@@ -83,9 +83,9 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.customer_name} - {self.services} - {self.date}"
+        return f"{self.customer.customer_name} - {self.service} - {self.date}"
 class Review(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    review_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveIntegerField()
@@ -93,4 +93,4 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.customer_name} - {self.company.name} - {self.rating}"
+        return f"{self.customer.customer_name} - {self.company.company_name} - {self.rating}"
