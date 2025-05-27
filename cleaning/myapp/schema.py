@@ -1,7 +1,11 @@
 import graphene
+from .views import *
 
-class Query(graphene.ObjectType):
-    hello = graphene.String(name=graphene.String(default_value="stranger"))
+class Mutation(graphene.ObjectType):
+    register_user = RegisterUser.Field()
+    login_user = LoginUser.Field()
 
-    def resolve_hello(self, info, name):
-        return f"Hello, {name}!"
+class Query(HelloQuery, graphene.ObjectType):
+    pass
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
