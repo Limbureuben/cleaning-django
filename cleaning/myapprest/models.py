@@ -16,7 +16,7 @@ class Company(models.Model):
     available_date = models.DateField()
     is_available = models.BooleanField(default=True)
     description = models.TextField(blank=True)
-    logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
+    # logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -39,7 +39,7 @@ class Employee(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.employee_name
 class Service(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='services')
@@ -74,7 +74,7 @@ class Booking(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    service = models.ManyToManyField(Service, on_delete=models.CASCADE)
+    service = models.ManyToManyField(Service)
     date = models.DateField()
     time = models.TimeField()
     hours_requested = models.PositiveIntegerField()
@@ -83,7 +83,7 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.customer_name} - {self.service.name} - {self.date}"
+        return f"{self.customer.customer_name} - {self.services} - {self.date}"
 class Review(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -93,4 +93,4 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.customer.name} - {self.company.name} - {self.rating}"
+        return f"{self.customer.customer_name} - {self.company.name} - {self.rating}"
