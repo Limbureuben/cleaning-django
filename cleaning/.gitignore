@@ -1,0 +1,70 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+
+# Media and static files
+media/
+staticfiles/
+
+# Environment / virtualenv
+venv/
+env/
+reuben/  # if this is your virtual environment
+ENV/
+env.bak/
+venv.bak/
+
+# VS Code workspace settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# Local settings
+local_settings.py
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# macOS
+.DS_Store
+
+# Backup files
+*~
+*.bak
+
+# Node modules (if you have some JS tooling)
+node_modules/
+
+# JetBrains IDE-specific
+*.iml
+
+# Build system
+dist/
+build/
+
+# Compiled translation files
+*.mo
+
+# Sphinx documentation
+docs/_build/
+
+# pip-tools output
+requirements*.txt
