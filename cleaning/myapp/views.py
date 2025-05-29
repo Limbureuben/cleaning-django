@@ -1,7 +1,7 @@
-import graphene
-from django.contrib.auth import get_user_model
-from graphql_jwt.shortcuts import get_token, create_refresh_token
-from graphene_django.types import DjangoObjectType
+import graphene # type: ignore
+from django.contrib.auth import get_user_model # type: ignore
+from graphql_jwt.utils import get_token # type: ignore
+from graphene_django.types import DjangoObjectType # type: ignore
 
 User = get_user_model()
 
