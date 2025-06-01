@@ -31,9 +31,9 @@ class RegisterUser(graphene.Mutation):
             return RegisterUser(success=False, message="Username already exists")
         
         if User.objects.filter(email=email).exists():
-            return RegisterUser(success=False, message="Email alredy exist")
+            return RegisterUser(success=False, message="Email already exist")
 
-        user = User(username=username)
+        user = User(username=username, email=email)
         
         if role == 'staff':
             user.is_staff = True
