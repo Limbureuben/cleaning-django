@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'myapp',
     'myapprest',
     'rest_framework',
-    'rest_framework.authtoken',
     'corsheaders',
     'graphene_django',
 ]
@@ -177,3 +176,7 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
