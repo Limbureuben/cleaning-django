@@ -37,7 +37,7 @@ class RegisterUser(graphene.Mutation):
         
         if role == 'staff':
             user.is_staff = True
-            user.is_superuser = False  # You could also set True if needed
+            user.is_superuser = False
         else:
             user.is_staff = False
             user.is_superuser = False
