@@ -9,7 +9,7 @@ class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     password_confirm = serializers.CharField(write_only=True)
-    is_staff = serializers.BooleanField(default=False, required=False)
+    role = serializers.ChoiceField(choices=[('staff', 'Staff'), ('user', 'User')], required=False)
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -20,9 +20,10 @@ class UserRegistrationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        is_staff = validated_data.pop('is_staff', False)
+        role = validated_data.pop('role', 'user')  # Default to 'user' if not provided
+
         user = User(**validated_data)
-        user.is_staff = is_staff  # Default to False if not provided
+        user.is_staff = True if role == 'staff' else False
         user.set_password(validated_data['password'])
         user.save()
         return user
