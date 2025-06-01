@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'myapp',
     'myapprest',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'graphene_django',
 ]
