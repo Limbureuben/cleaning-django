@@ -7,6 +7,7 @@ from .serializers import UserRegistrationSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 
+
 class UserRegistrationAPIView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
