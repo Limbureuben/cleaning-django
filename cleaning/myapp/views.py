@@ -1,8 +1,9 @@
 import graphene # type: ignore
 from django.contrib.auth import get_user_model # type: ignore
-from graphql_jwt.utils import get_token # type: ignore
 from graphene_django.types import DjangoObjectType
 from django.contrib.auth.models import User
+from graphql_jwt.shortcuts import get_token
+from django.contrib.auth import authenticate
 
 
 class UserType(DjangoObjectType):
@@ -43,9 +44,8 @@ class RegisterUser(graphene.Mutation):
         return RegisterUser(user=user, success=True, message="User registered successfully")
 
 
-# Login mutation
 class LoginUser(graphene.Mutation):
-    user = graphene.Field(UserType)
+    user = graphene.Field(lambda: UserType)
     token = graphene.String()
     message = graphene.String()
     success = graphene.Boolean()
@@ -55,8 +55,9 @@ class LoginUser(graphene.Mutation):
         password = graphene.String(required=True)
 
     def mutate(self, info, username, password):
-        user = User.objects.filter(username=username).first()
-        if user is None or not user.check_password(password):
+        user = authenticate(username=username, password=password)
+
+        if user is None:
             return LoginUser(
                 success=False,
                 message="Invalid username or password."
