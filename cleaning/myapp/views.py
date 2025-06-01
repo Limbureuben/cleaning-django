@@ -14,6 +14,7 @@ class UserType(DjangoObjectType):
 class RegisterUser(graphene.Mutation):
     class Arguments:
         username = graphene.String(required=True)
+        email = graphene.String(required=True)
         password = graphene.String(required=True)
         confirm_password = graphene.String(required=True)
         role = graphene.String(required=False)
@@ -22,12 +23,15 @@ class RegisterUser(graphene.Mutation):
     success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, username, password, confirm_password, role=None):
+    def mutate(self, info, username, email, password, confirm_password, role=None):
         if password != confirm_password:
             return RegisterUser(success=False, message="Passwords do not match")
 
         if User.objects.filter(username=username).exists():
             return RegisterUser(success=False, message="Username already exists")
+        
+        if User.objects.filter(email=email).exists():
+            return RegisterUser(success=False, message="Email alredy exist")
 
         user = User(username=username)
         
