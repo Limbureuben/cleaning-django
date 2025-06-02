@@ -28,3 +28,9 @@ class RegisterOrganizationSerializer(serializers.ModelSerializer):
 
     def get_services_list(self, obj):
         return obj.services.split(', ') if obj.services else []
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = '__all__'

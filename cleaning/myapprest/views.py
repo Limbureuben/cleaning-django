@@ -42,3 +42,22 @@ class OrganizationViewAdmin(APIView):
         organizations = Organization.objects.all()
         serializer = RegisterOrganizationSerializer(organizations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class UpdateOrganizationStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            organization = Organization.objects.get(pk=pk)
+        except Organization.DoesNotExist:
+            return Response({'error': 'Organization not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        new_status = request.data.get('status')
+        if new_status not in dict(Organization.STATUS_CHOICES):
+            return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+
+        organization.status = new_status
+        organization.save()
+        serializer = OrganizationSerializer(organization)
+        return Response(serializer.data, status=status.HTTP_200_OK)
