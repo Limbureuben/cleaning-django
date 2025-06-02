@@ -5,20 +5,30 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import *
 from django.contrib.auth import authenticate
+from rest_framework import status, permissions
 from rest_framework.authtoken.models import Token
 
 
 class RegisterOrganizationView(APIView):
+    # Only allow authenticated users to register organizations
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
-        serializer = RegisterOrganizationSerializer(data=request.data, context={'request': request})
+        # Create serializer without 'user' in request.data
+        serializer = RegisterOrganizationSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
         if serializer.is_valid():
-            serializer.save()
+            # Save and associate the logged-in user
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         # Print the errors for debugging
-        print(serializer.errors)  # <-- add this
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
     def get(self, request):
         organizations = Organization.objects.all()
         serializer = RegisterOrganizationSerializer(organizations, many=True)

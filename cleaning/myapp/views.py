@@ -4,6 +4,7 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.auth.models import User
 from graphql_jwt.shortcuts import get_token
 from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserType(DjangoObjectType):
@@ -67,11 +68,14 @@ class LoginUser(graphene.Mutation):
                 message="Invalid username or password."
             )
 
-        token = get_token(user)
+        # token = get_token(user)
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
         return LoginUser(
             user=user,
-            token=token,
+            # token=token,
+            token=access_token,
             message="Login successful.",
             success=True
         )
