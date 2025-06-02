@@ -10,6 +10,9 @@ class RegisterOrganizationSerializer(serializers.ModelSerializer):
     # Return a list of services as read-only
     services_list = serializers.SerializerMethodField(read_only=True)
 
+    # Make the user field read-only
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Organization
         fields = ['id', 'user', 'organization_name', 'location', 'email', 'address', 'services', 'services_list']
