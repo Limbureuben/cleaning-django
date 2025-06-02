@@ -5,8 +5,10 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import *
 from django.contrib.auth import authenticate
-from rest_framework import status, permissions
+from rest_framework import status, permissions, authentication
 from rest_framework.authtoken.models import Token
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 
 class RegisterOrganizationView(APIView):
