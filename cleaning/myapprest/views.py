@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 
 class RegisterOrganizationView(APIView):
     def post(self, request):
-        serializer = RegisterOrganizationSerializer(data=request.data)
+        serializer = RegisterOrganizationSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
