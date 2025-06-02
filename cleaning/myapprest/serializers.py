@@ -2,23 +2,26 @@ from rest_framework import serializers
 from .models import *
 
 class RegisterOrganizationSerializer(serializers.ModelSerializer):
-    # Make service a list field for input/output
+    # Use a list field for input
     services = serializers.ListField(
         child=serializers.CharField(),
-        write_only=True  # Will only be used during creation
+        write_only=True
     )
-    service = serializers.SerializerMethodField(read_only=True)
+    # Return a list of services as read-only
+    services_list = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Organization
-        fields = ['id', 'user', 'organization_name', 'location', 'email', 'address', 'services', 'service']
+        fields = ['id', 'user', 'organization_name', 'location', 'email', 'address', 'services', 'services_list']
 
     def create(self, validated_data):
-        services = validated_data.pop('services', [])
-        validated_data['service'] = ', '.join(services)  # Store as comma-separated string
-        validated_data['user'] = self.context['request'].user  # Automatically set the user
+        # Get the list of services
+        services_list = validated_data.pop('services', [])
+        # Store as comma-separated string
+        validated_data['services'] = ', '.join(services_list)
+        # Set the user automatically
+        validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
 
-    def get_service(self, obj):
-        return obj.service.split(', ') if obj.service else []
-
+    def get_services_list(self, obj):
+        return obj.services.split(', ') if obj.services else []

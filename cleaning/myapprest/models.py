@@ -7,4 +7,4 @@ class Organization(models.Model):
     location = models.CharField(max_length=255)
     email = models.EmailField()
     address = models.CharField(max_length=100)
-    service = models.CharField(max_length=500)
+    services = models.CharField(max_length=500)

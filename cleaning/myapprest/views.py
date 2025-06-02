@@ -14,7 +14,10 @@ class RegisterOrganizationView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Print the errors for debugging
+        print(serializer.errors)  # <-- add this
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
     def get(self, request):
         organizations = Organization.objects.all()
