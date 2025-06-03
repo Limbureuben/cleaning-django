@@ -15,7 +15,7 @@ class RegisterOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Organization
-        fields = ['id', 'user', 'organization_name', 'location', 'email', 'address', 'services', 'services_list']
+        fields = ['id', 'user', 'organization_name', 'location', 'email', 'address', 'services', 'services_list', 'status']
 
     def create(self, validated_data):
         # Get the list of services
