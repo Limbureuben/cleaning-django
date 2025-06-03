@@ -34,3 +34,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = '__all__'
+
+
+class OrganizationStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ['organization_name', 'status', 'email']

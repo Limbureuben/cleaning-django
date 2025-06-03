@@ -74,7 +74,7 @@ class OrganizationStatusView(APIView):
             if organization:
                 return Response({'message': 'No organization registered.'}, status=status.HTTP_404_NOT_FOUND)
             
-            serializer = OrganizationSerializer(organization)
+            serializer = OrganizationStatusSerializer(organization)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
         except Exception as e:
