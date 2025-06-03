@@ -67,15 +67,20 @@ class UpdateOrganizationStatusView(APIView):
 
 class OrganizationStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    def get(self, request):
-        try:
-            organization = Organization.objects.filter(user=request.user).first()
-            if organization:
-                return Response({'message': 'No organization registered.'}, status=status.HTTP_404_NOT_FOUND)
+    # def get(self, request):
+    #     try:
+    #         organization = Organization.objects.filter(user=request.user).first()
+    #         if organization:
+    #             return Response({'message': 'No organization registered.'}, status=status.HTTP_404_NOT_FOUND)
             
-            serializer = OrganizationStatusSerializer(organization)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    #         serializer = OrganizationStatusSerializer(organization)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
         
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    #     except Exception as e:
+    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    def get(self, request):
+        # Get organizations for the current logged-in user
+        organizations = Organization.objects.filter(user=request.user)
+        serializer = OrganizationSerializer(organizations, many=True)
+        return Response(serializer.data)
