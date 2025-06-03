@@ -39,4 +39,4 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class OrganizationStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['organization_name', 'status', 'email']
+        fields = ['organization_name', 'email', 'status']

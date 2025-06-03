@@ -67,7 +67,6 @@ class UpdateOrganizationStatusView(APIView):
 
 class OrganizationStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
     def get(self, request):
         try:
             organization = Organization.objects.filter(user=request.user).first()
