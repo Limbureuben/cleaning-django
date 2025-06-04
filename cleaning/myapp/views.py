@@ -1,58 +1,56 @@
 import graphene # type: ignore
 from django.contrib.auth import get_user_model # type: ignore
-from graphql_jwt.utils import get_token # type: ignore
-from graphene_django.types import DjangoObjectType # type: ignore
+from graphene_django.types import DjangoObjectType
+from django.contrib.auth.models import User
+from graphql_jwt.shortcuts import get_token
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
 
-User = get_user_model()
 
-# UserType
 class UserType(DjangoObjectType):
     class Meta:
         model = User
-        exclude = ('password',)
+        fields = ("id", "username", "is_staff", "is_superuser")
 
-# Registration mutation
 class RegisterUser(graphene.Mutation):
-    user = graphene.Field(UserType)
-    token = graphene.String()
-    message = graphene.String()
-    success = graphene.Boolean()
-
     class Arguments:
         username = graphene.String(required=True)
         email = graphene.String(required=True)
         password = graphene.String(required=True)
-        password_confirm = graphene.String(required=True)
+        confirm_password = graphene.String(required=True)
+        role = graphene.String(required=False)
 
-    def mutate(self, info, username, email, password, password_confirm):
-        if password != password_confirm:
-            return RegisterUser(
-                success=False,
-                message="Passwords do not match."
-            )
+    user = graphene.Field(UserType)
+    success = graphene.Boolean()
+    message = graphene.String()
+
+    def mutate(self, info, username, email, password, confirm_password, role=None):
+        if password != confirm_password:
+            return RegisterUser(success=False, message="Passwords do not match")
 
         if User.objects.filter(username=username).exists():
-            return RegisterUser(
-                success=False,
-                message="User with this username already exists."
-            )
+            return RegisterUser(success=False, message="Username already exists")
+        
+        if User.objects.filter(email=email).exists():
+            return RegisterUser(success=False, message="Email already exist")
 
-        user = User(username=username, email=email, is_staff=False)
+        user = User(username=username, email=email)
+        
+        if role == 'staff':
+            user.is_staff = True
+            user.is_superuser = False
+        else:
+            user.is_staff = False
+            user.is_superuser = False
+
         user.set_password(password)
         user.save()
 
-        token = get_token(user)
+        return RegisterUser(user=user, success=True, message="User registered successfully")
 
-        return RegisterUser(
-            user=user,
-            token=token,
-            message="User registered successfully.",
-            success=True
-        )
 
-# Login mutation
 class LoginUser(graphene.Mutation):
-    user = graphene.Field(UserType)
+    user = graphene.Field(lambda: UserType)
     token = graphene.String()
     message = graphene.String()
     success = graphene.Boolean()
@@ -62,18 +60,22 @@ class LoginUser(graphene.Mutation):
         password = graphene.String(required=True)
 
     def mutate(self, info, username, password):
-        user = User.objects.filter(username=username).first()
-        if user is None or not user.check_password(password):
+        user = authenticate(username=username, password=password)
+
+        if user is None:
             return LoginUser(
                 success=False,
                 message="Invalid username or password."
             )
 
-        token = get_token(user)
+        # token = get_token(user)
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
 
         return LoginUser(
             user=user,
-            token=token,
+            # token=token,
+            token=access_token,
             message="Login successful.",
             success=True
         )
