@@ -61,7 +61,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 
+# serializers.py
 class CleanerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cleaner
-        fields = '__all__'
+        fields = ['id', 'full_name', 'location', 'contact', 'status', 'user']
+        read_only_fields = ['user', 'status']
