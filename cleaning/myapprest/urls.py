@@ -8,6 +8,8 @@ urlpatterns = [
     path('organization-status/', OrganizationStatusView.as_view(), name="Viewmyorganizationstatus"),
     path('fetch-approved/', FetchApprovedOrganization.as_view(), name="Approved-organizations"),
     path('user-profile/', UserProfileView.as_view(), name="user-profile"),
-    path('send-service-request/', SendServiceRequest.as_view(), name="Request-services")
+    path('send-service-request/', SendServiceRequest.as_view(), name="Request-services"),
+    path('my-organization-requests/', StaffOrganizationRequests.as_view(), name='staff-organization-requests'),
+
 
 ]

@@ -101,3 +101,17 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
+
+
+class StaffOrganizationRequests(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Get all organizations created by this staff user
+        organizations = Organization.objects.filter(user=request.user)
+
+        # Get service requests for those organizations
+        requests = ServiceRequest.objects.filter(organization__in=organizations)
+
+        serializer = ServiceRequestSerializer(requests, many=True)
+        return Response(serializer.data)

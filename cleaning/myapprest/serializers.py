@@ -48,6 +48,7 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
 
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source='organization.organization_name', read_only=True)
     class Meta:
         model = ServiceRequest
         fields = '__all__'
