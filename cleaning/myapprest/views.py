@@ -72,3 +72,11 @@ class OrganizationStatusView(APIView):
         organizations = Organization.objects.filter(user=request.user)
         serializer = OrganizationSerializer(organizations, many=True)
         return Response(serializer.data)
+
+class FetchApprovedOrganization(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        organization = Organization.objects.filter(status="approved")
+        serializer = OrganizationSerializer(organization, many=True)
+        return Response(serializer.data)
