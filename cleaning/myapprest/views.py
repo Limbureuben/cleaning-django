@@ -115,3 +115,27 @@ class StaffOrganizationRequests(APIView):
 
         serializer = ServiceRequestSerializer(requests, many=True)
         return Response(serializer.data)
+    
+
+
+class RegisterCleanerView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = CleanerSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            try:
+                organization = Organization.objects.get(staff=user)  # adjust if different
+            except Organization.DoesNotExist:
+                return Response({"error": "Organization not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            Cleaner.objects.create(
+                user=user,
+                organization=organization,
+                full_name=serializer.validated_data['full_name'],
+                contact=serializer.validated_data['contact'],
+                status='available'
+            )
+            return Response({"message": "Cleaner registered successfully."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

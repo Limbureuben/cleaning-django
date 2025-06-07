@@ -58,3 +58,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email']
+
+
+
+class CleanerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cleaner
+        fields = ['id', 'full_name', 'contact']
