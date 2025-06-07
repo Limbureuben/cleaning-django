@@ -9,7 +9,8 @@ class Organization(models.Model):
         ('suspended', 'Suspended'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizations')
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizations')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='organization')
     organization_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     email = models.EmailField()
@@ -35,9 +36,9 @@ class Cleaner(models.Model):
         ('busy', 'Busy'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # staff who registered the cleaner
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, null=True)
     contact = models.CharField(max_length=20)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
 

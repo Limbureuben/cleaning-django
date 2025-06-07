@@ -15,6 +15,6 @@ admin.site.register(ServiceRequest, ServiceRequestAdmin)
 
 
 class CleanerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'organization', 'full_name', 'contact', 'status')
-    search_fields = ('organization', 'full_name')
+    list_display = ('user', 'full_name', 'location', 'contact', 'status')
+    search_fields = ('location', 'full_name')
 admin.site.register(Cleaner, CleanerAdmin)
