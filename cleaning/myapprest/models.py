@@ -35,10 +35,10 @@ class Cleaner(models.Model):
         ('busy', 'Busy'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # cleaner's user account
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100)
-    contact = models.CharField(max_length=255)
+    contact = models.CharField(max_length=20)  # 📞 New field added
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
 
     def __str__(self):

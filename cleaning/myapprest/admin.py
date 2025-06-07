@@ -11,3 +11,10 @@ class ServiceRequestAdmin(admin.ModelAdmin):
     list_display = ('user', 'organization', 'username', 'email', 'phone')
     search_fields = ('organization', 'username')
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
+
+
+
+class CleanerAdmin(admin.ModelAdmin):
+    list_display = ('user', 'organization', 'full_name', 'contact', 'status')
+    search_fields = ('organization', 'full_name')
+admin.site.register(Cleaner, CleanerAdmin)
