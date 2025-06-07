@@ -11,4 +11,5 @@ urlpatterns = [
     path('send-service-request/', SendServiceRequest.as_view(), name="Request-services"),
     path('my-organization-requests/', StaffOrganizationRequests.as_view(), name='staff-organization-requests'),
     path('register-cleaner/', RegisterCleanersAPI.as_view(), name='register-cleaner'),
+    path('available-cleaners/', AvailableCleanersView.as_view(), name='available-cleaners'),
 ]

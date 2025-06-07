@@ -127,3 +127,12 @@ class RegisterCleanersAPI(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class AvailableCleanersView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Filter cleaners registered by the logged-in staff and who are available
+        cleaners = Cleaner.objects.filter(user=request.user, status='available')
+        serializer = CleanerSerializer(cleaners, many=True)
+        return Response(serializer.data)
