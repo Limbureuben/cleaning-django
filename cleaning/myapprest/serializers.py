@@ -40,3 +40,8 @@ class OrganizationStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ['organization_name', 'location', 'email',  'status']
+
+class FetchedOrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ['id', 'organization_name', 'location', 'email', 'address', 'services']

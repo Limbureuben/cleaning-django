@@ -78,5 +78,5 @@ class FetchApprovedOrganization(APIView):
 
     def get(self, request):
         organization = Organization.objects.filter(status="approved")
-        serializer = OrganizationSerializer(organization, many=True)
+        serializer = FetchedOrganizationSerializer(organization, many=True)
         return Response(serializer.data)
