@@ -1,12 +1,12 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView # type: ignore
+from rest_framework.response import Response # type: ignore
+from rest_framework import status # type: ignore
+from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 from .serializers import *
 from django.contrib.auth import authenticate
-from rest_framework import status, permissions, authentication
-from rest_framework.authtoken.models import Token
+from rest_framework import status, permissions, authentication # type: ignore
+from rest_framework.authtoken.models import Token # type: ignore
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
