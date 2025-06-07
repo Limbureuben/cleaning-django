@@ -93,3 +93,11 @@ class SendServiceRequest(APIView):
             serializer.save()
             return Response({"success": "Request sent successfully"}, status=201)
         return Response(serializer.errors, status=400)
+
+
+class UserProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
