@@ -64,4 +64,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CleanerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cleaner
-        fields = ['id', 'full_name', 'contact']
+        fields = '__all__'
