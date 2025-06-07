@@ -19,7 +19,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include
-from graphene_django.views import GraphQLView
+from graphene_django.views import GraphQLView # type: ignore
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [

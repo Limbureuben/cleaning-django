@@ -1,10 +1,10 @@
 import graphene # type: ignore
 from django.contrib.auth import get_user_model # type: ignore
-from graphene_django.types import DjangoObjectType
+from graphene_django.types import DjangoObjectType # type: ignore
 from django.contrib.auth.models import User
-from graphql_jwt.shortcuts import get_token
+from graphql_jwt.shortcuts import get_token # type: ignore
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 
 
 class UserType(DjangoObjectType):
