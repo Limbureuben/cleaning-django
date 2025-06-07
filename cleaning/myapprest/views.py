@@ -79,3 +79,17 @@ class FetchApprovedOrganization(APIView):
         organization = Organization.objects.filter(status="approved")
         serializer = FetchedOrganizationSerializer(organization, many=True)
         return Response(serializer.data)
+
+
+class SendServiceRequest(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        data = request.data.copy()
+        data['user'] = request.user.id
+
+        serializer = ServiceRequestSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": "Request sent successfully"}, status=201)
+        return Response(serializer.errors, status=400)
