@@ -9,12 +9,13 @@ class Organization(models.Model):
         ('suspended', 'Suspended'),
     )
 
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizations')
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='organization')
     organization_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
-    email = models.EmailField()
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True)  # Replaced email
     address = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15, null=True)
+    file = models.FileField(upload_to='organization_files/', null=True, blank=True)
     services = models.CharField(max_length=500)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 

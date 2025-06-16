@@ -3,8 +3,8 @@ from .models import *
 
 # Register your models here.
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ('organization_name', 'location', 'email', 'address', 'services', 'user', 'status')
-    search_fields = ('organization_name', 'location', 'email')
+    list_display = ('organization_name', 'location', 'price', 'address', 'services', 'user', 'phone', 'status')
+    search_fields = ('organization_name', 'location', 'price')
 admin.site.register(Organization, OrganizationAdmin)
 
 class ServiceRequestAdmin(admin.ModelAdmin):
