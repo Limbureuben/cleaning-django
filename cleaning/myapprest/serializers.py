@@ -38,9 +38,21 @@ class OrganizationStatusSerializer(serializers.ModelSerializer):
         fields = ['organization_name', 'location', 'email',  'status']
 
 class FetchedOrganizationSerializer(serializers.ModelSerializer):
+    services_list = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()  # Ensures full file URL
+
     class Meta:
         model = Organization
-        fields = ['id', 'organization_name', 'location', 'email', 'address', 'services']
+        fields = ['id', 'organization_name', 'location', 'price', 'address', 'phone', 'file', 'services', 'services_list']
+
+    def get_services_list(self, obj):
+        return obj.services.split(', ') if obj.services else []
+
+    def get_file(self, obj):
+        request = self.context.get('request')
+        if obj.file and request:
+            return request.build_absolute_uri(obj.file.url)
+        return None
 
 
 class ServiceRequestSerializer(serializers.ModelSerializer):

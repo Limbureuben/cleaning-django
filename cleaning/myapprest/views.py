@@ -75,10 +75,12 @@ class OrganizationStatusView(APIView):
 
 class FetchApprovedOrganization(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
-        organization = Organization.objects.filter(status="approved")
-        serializer = FetchedOrganizationSerializer(organization, many=True)
+        organizations = Organization.objects.filter(status="pending")
+        serializer = FetchedOrganizationSerializer(organizations, many=True, context={'request': request})
         return Response(serializer.data)
+
 
 
 class SendServiceRequest(APIView):
