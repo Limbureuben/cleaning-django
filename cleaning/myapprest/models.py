@@ -9,7 +9,8 @@ class Organization(models.Model):
         ('suspended', 'Suspended'),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='organization')
+    # user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='organization')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizations')
     organization_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)  # Replaced email
