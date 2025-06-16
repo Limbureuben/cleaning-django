@@ -12,9 +12,10 @@ class RegisterOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = [
-            'id', 'user', 'organization_name', 'location', 'price', 'address',
-            'phone', 'file', 'services', 'services_list', 'status'
+            'id', 'user', 'location', 'price', 'address',
+            'phone', 'file', 'services', 'services_list', 'guest', 'bedrooms', 'bathrooms', 'status'
         ]
+
 
     def create(self, validated_data):
         services_list = validated_data.pop('services', [])

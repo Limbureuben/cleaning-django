@@ -11,14 +11,17 @@ class Organization(models.Model):
 
     # user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='organization')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='organizations')
-    organization_name = models.CharField(max_length=255)
     location = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)  # Replaced email
     address = models.CharField(max_length=100)
     phone = models.CharField(max_length=15, null=True)
     file = models.FileField(upload_to='organization_files/', null=True, blank=True)
     services = models.CharField(max_length=500)
+    bedrooms = models.CharField(max_length=10)
+    guest = models.CharField(max_length=10)
+    bathrooms = models.CharField(max_length=10)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
 
 
 class ServiceRequest(models.Model):
