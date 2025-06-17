@@ -17,9 +17,9 @@ class Organization(models.Model):
     phone = models.CharField(max_length=15, null=True)
     file = models.FileField(upload_to='organization_files/', null=True, blank=True)
     services = models.CharField(max_length=500)
-    bedrooms = models.CharField(max_length=10)
-    guest = models.CharField(max_length=10)
-    bathrooms = models.CharField(max_length=10)
+    bedrooms = models.CharField(max_length=10, null=True)
+    guests = models.CharField(max_length=10, null=True)
+    bathrooms = models.CharField(max_length=10, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
 

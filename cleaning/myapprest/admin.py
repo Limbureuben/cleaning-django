@@ -3,7 +3,7 @@ from .models import *
 
 # Register your models here.
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ('location', 'price', 'address', 'services', 'user', 'phone', 'status', 'guest', 'bedrooms', 'bathrooms', 'file')
+    list_display = ('location', 'price', 'address', 'services', 'user', 'phone', 'status', 'guests', 'bedrooms', 'bathrooms', 'file')
     search_fields = ('location', 'price')
 admin.site.register(Organization, OrganizationAdmin)
 

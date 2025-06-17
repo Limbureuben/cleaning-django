@@ -13,7 +13,7 @@ class RegisterOrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = [
             'id', 'user', 'location', 'price', 'address',
-            'phone', 'file', 'services', 'services_list', 'guest', 'bedrooms', 'bathrooms', 'status'
+            'phone', 'file', 'services', 'services_list', 'guests', 'bedrooms', 'bathrooms', 'status'
         ]
 
 
@@ -44,7 +44,7 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Organization
-        fields = ['id', 'organization_name', 'location', 'price', 'address', 'phone', 'file', 'services', 'services_list']
+        fields = ['id', 'location', 'price', 'bedrooms', 'guests', 'bathrooms', 'address', 'phone', 'file', 'services', 'services_list']
 
     def get_services_list(self, obj):
         return obj.services.split(', ') if obj.services else []
