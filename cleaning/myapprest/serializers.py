@@ -1,3 +1,4 @@
+from rest_framework.exceptions import ValidationError
 from rest_framework import serializers # type: ignore
 from .models import *
 
@@ -74,7 +75,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class CleanerSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
         model = Cleaner
@@ -85,13 +86,16 @@ class CleanerSerializer(serializers.ModelSerializer):
         username = validated_data.pop('username')
         email = validated_data.pop('email')
         password = validated_data.pop('password')
-
-        # Create the Django user for cleaner
-        auth_user = User.objects.create_user(username=username, email=email, password=password)
-        auth_user.save()
-
-        # Create the cleaner instance
         registered_by = self.context['request'].user
+
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            raise ValidationError({'username': 'This username is already taken.'})
+
+        # Create the auth user
+        auth_user = User.objects.create_user(username=username, email=email, password=password)
+
+        # Create cleaner linked to that user
         cleaner = Cleaner.objects.create(
             auth_user=auth_user,
             registered_by=registered_by,

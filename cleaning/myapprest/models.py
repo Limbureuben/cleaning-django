@@ -62,8 +62,8 @@ class Cleaner(models.Model):
         ('busy', 'Busy'),
     ]
 
-    registered_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registered_cleaners')
-    auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cleaner_profile')
+    registered_by = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name='registered_cleaners')
+    auth_user = models.OneToOneField(User, null=True, on_delete=models.CASCADE, related_name='cleaner_profile')
     full_name = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True)
     contact = models.CharField(max_length=20)
