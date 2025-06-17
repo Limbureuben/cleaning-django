@@ -62,12 +62,8 @@ class Cleaner(models.Model):
         ('busy', 'Busy'),
     ]
 
-    # Staff who registered this cleaner
     registered_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registered_cleaners')
-
-    # Auth account for cleaner
     auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cleaner_profile')
-
     full_name = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True)
     contact = models.CharField(max_length=20)

@@ -9,6 +9,7 @@ from rest_framework import status, permissions, authentication # type: ignore
 from rest_framework.authtoken.models import Token # type: ignore
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import api_view # type: ignore
 
 
 class RegisterOrganizationView(APIView):
@@ -140,3 +141,32 @@ class AvailableCleanersView(APIView):
         cleaners = Cleaner.objects.filter(user=request.user, status='available')
         serializer = CleanerSerializer(cleaners, many=True)
         return Response(serializer.data)
+    
+
+
+@api_view(['POST'])
+def custom_login(request):
+    # Authenticate user manually or use DRF's TokenObtainPairView
+    user = authenticate(username=request.data['username'], password=request.data['password'])
+    if not user:
+        return Response({'error': 'Invalid credentials'}, status=401)
+
+    # Create JWT tokens
+    refresh = RefreshToken.for_user(user)
+
+    # Determine role
+    if user.is_superuser:
+        role = 'admin'
+    elif hasattr(user, 'cleaner_profile'):
+        role = 'cleaner'
+    elif user.is_staff:
+        role = 'staff'
+    else:
+        role = 'user'
+
+    return Response({
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+        'username': user.username,
+        'role': role
+    })
