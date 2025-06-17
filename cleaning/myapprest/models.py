@@ -35,6 +35,25 @@ class ServiceRequest(models.Model):
     requested_at = models.DateTimeField(auto_now_add=True)
 
 
+# class Cleaner(models.Model):
+#     STATUS_CHOICES = [
+#         ('available', 'Available'),
+#         ('assigned', 'Assigned'),
+#         ('inactive', 'Inactive'),
+#         ('busy', 'Busy'),
+#     ]
+
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     full_name = models.CharField(max_length=100)
+#     location = models.CharField(max_length=100, null=True)
+#     contact = models.CharField(max_length=20)
+#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+
+#     def __str__(self):
+#         return f"{self.full_name} - {self.status}"
+
+
+
 class Cleaner(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -43,7 +62,12 @@ class Cleaner(models.Model):
         ('busy', 'Busy'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # Staff who registered this cleaner
+    registered_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='registered_cleaners')
+
+    # Auth account for cleaner
+    auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cleaner_profile')
+
     full_name = models.CharField(max_length=100)
     location = models.CharField(max_length=100, null=True)
     contact = models.CharField(max_length=20)
