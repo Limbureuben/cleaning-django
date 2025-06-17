@@ -72,7 +72,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 # serializers.py
 class CleanerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = Cleaner
-        fields = ['id', 'full_name', 'location', 'contact', 'status', 'user']
-        read_only_fields = ['user', 'status']
+        fields = ['id', 'full_name', 'location', 'contact', 'status', 'username', 'email', 'password']
+        read_only_fields = ['status']
+
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        email = validated_data.pop('email')
+        password = validated_data.pop('password')
+
+        # Create the Django user for cleaner
+        auth_user = User.objects.create_user(username=username, email=email, password=password)
+        auth_user.save()
+
+        # Create the cleaner instance
+        registered_by = self.context['request'].user
+        cleaner = Cleaner.objects.create(
+            auth_user=auth_user,
+            registered_by=registered_by,
+            **validated_data
+        )
+        return cleaner
