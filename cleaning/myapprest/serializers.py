@@ -88,14 +88,17 @@ class CleanerSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         registered_by = self.context['request'].user
 
-        # Check if username already exists
+        # ✅ Check for unique username
         if User.objects.filter(username=username).exists():
             raise ValidationError({'username': 'This username is already taken.'})
 
-        # Create the auth user
-        auth_user = User.objects.create_user(username=username, email=email, password=password)
+        auth_user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
 
-        # Create cleaner linked to that user
+
         cleaner = Cleaner.objects.create(
             auth_user=auth_user,
             registered_by=registered_by,

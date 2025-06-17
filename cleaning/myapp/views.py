@@ -8,9 +8,14 @@ from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
 
 
 class UserType(DjangoObjectType):
+    is_cleaner = graphene.Boolean()
     class Meta:
         model = User
         fields = ("id", "username", "is_staff", "is_superuser")
+
+    
+    def resolve_is_cleaner(self, info):
+        return hasattr(self, 'cleaner')
 
 class RegisterUser(graphene.Mutation):
     class Arguments:
