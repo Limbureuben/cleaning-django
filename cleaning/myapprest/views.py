@@ -110,7 +110,6 @@ class UserProfileView(APIView):
 
 class StaffOrganizationRequests(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
     def get(self, request):
         # Get all organizations created by this staff user
         organizations = Organization.objects.filter(user=request.user)
