@@ -30,6 +30,8 @@ class ServiceRequest(models.Model):
     username = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
     requested_at = models.DateTimeField(auto_now_add=True)
 
 

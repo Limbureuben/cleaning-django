@@ -92,7 +92,10 @@ class SendServiceRequest(APIView):
 
         serializer = ServiceRequestSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            service_request = serializer.save(user=request.user)
+            org = service_request.Organization
+            org.status = 'suspended'
+            org.save()
             return Response({"success": "Request sent successfully"}, status=201)
         return Response(serializer.errors, status=400)
 

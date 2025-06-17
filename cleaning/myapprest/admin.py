@@ -8,7 +8,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 admin.site.register(Organization, OrganizationAdmin)
 
 class ServiceRequestAdmin(admin.ModelAdmin):
-    list_display = ('user', 'organization', 'username', 'email', 'phone')
+    list_display = ('user', 'organization', 'username', 'email', 'phone', 'start_date', 'end_date')
     search_fields = ('organization', 'username')
 admin.site.register(ServiceRequest, ServiceRequestAdmin)
 
