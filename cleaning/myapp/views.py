@@ -5,53 +5,28 @@ from django.contrib.auth.models import User
 from graphql_jwt.shortcuts import get_token # type: ignore
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken # type: ignore
+from graphene_django import DjangoObjectType
+from cleaning_dto.cleaning import *
+from cleaning_dto.Response import *
+from cleaningBuilders.cleaningBuilder import *
 
 
 class UserType(DjangoObjectType):
-    is_cleaner = graphene.Boolean()
     class Meta:
         model = User
-        fields = ("id", "username", "is_staff", "is_superuser")
+        fields = ("id", "username", "is_staff", "is_superuser", "is_cleaner")
 
-    
-    def resolve_is_cleaner(self, info):
-        return hasattr(self, 'cleaner')
 
-class RegisterUser(graphene.Mutation):
+class RegistrationMutation(graphene.Mutation):
+    user = graphene.Field(RegistrationObject)
+    output = graphene.Field(RegistrationResponse)
+
     class Arguments:
-        username = graphene.String(required=True)
-        email = graphene.String(required=True)
-        password = graphene.String(required=True)
-        confirm_password = graphene.String(required=True)
-        role = graphene.String(required=False)
+        input = RegistrationInputObject(required=True)
 
-    user = graphene.Field(UserType)
-    success = graphene.Boolean()
-    message = graphene.String()
-
-    def mutate(self, info, username, email, password, confirm_password, role=None):
-        if password != confirm_password:
-            return RegisterUser(success=False, message="Passwords do not match")
-
-        if User.objects.filter(username=username).exists():
-            return RegisterUser(success=False, message="Username already exists")
-        
-        if User.objects.filter(email=email).exists():
-            return RegisterUser(success=False, message="Email already exist")
-
-        user = User(username=username, email=email)
-        
-        if role == 'staff':
-            user.is_staff = True
-            user.is_superuser = False
-        else:
-            user.is_staff = False
-            user.is_superuser = False
-
-        user.set_password(password)
-        user.save()
-
-        return RegisterUser(user=user, success=True, message="User registered successfully")
+    def mutate(self, info, input):
+        response = register_user(input)
+        return RegistrationMutation(user=response.user, output=response)
 
 
 class LoginUser(graphene.Mutation):
