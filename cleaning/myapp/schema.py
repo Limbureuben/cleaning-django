@@ -2,7 +2,7 @@ import graphene
 from .views import *
 
 class Mutation(graphene.ObjectType):
-    register_user = RegisterUser.Field()
+    register_user = RegistrationMutation.Field()
     login_user = LoginUser.Field()
 
 class Query(HelloQuery, graphene.ObjectType):
