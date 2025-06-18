@@ -11,9 +11,14 @@ class RegistrationInputObject(graphene.InputObjectType):
     password = graphene.String()
     passwordConfirm = graphene.String()
     role = graphene.String(required=False)
-    sessionId = graphene.String(required=False)
-    ward = graphene.String()
 
 class RegisterObject(graphene.ObjectType):
     id = graphene.ID()
     username = graphene.String()
+
+class UserLoginObject(graphene.ObjectType):
+    id = graphene.ID()
+    username = graphene.String()
+    token = graphene.String()
+    isStaff = graphene.Boolean()
+    isCleaner = graphene.Boolean()

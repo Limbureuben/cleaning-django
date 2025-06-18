@@ -42,7 +42,7 @@ def register_user(input):
     try:
         role = getattr(input, 'role', 'user') or 'user'
         ward = getattr(input, 'cleaner', None)
-        user = UserBuilder.register_user(input.username, input.password, input.passwordConfirm, role=role, email=getattr(input, 'email', ''), ward=ward)
+        user = UserBuilder.register_user(input.username, input.password, input.passwordConfirm, role=role, email=getattr(input, 'email', ''))
         
         return RegistrationResponse(
             message="User registration successful",
