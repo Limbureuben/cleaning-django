@@ -17,17 +17,6 @@ class UserType(DjangoObjectType):
         fields = ("id", "username", "is_staff", "is_superuser")
 
 
-# class RegistrationMutation(graphene.Mutation):
-#     user = graphene.Field(RegistrationObject)
-#     output = graphene.Field(RegistrationResponse)
-
-#     class Arguments:
-#         input = RegistrationInputObject(required=True)
-
-#     def mutate(self, info, input):
-#         response = register_user(input)
-#         return RegistrationMutation(user=response.user, output=response)
-
 class RegistrationMutation(graphene.Mutation):
     user = graphene.Field(RegistrationObject)
     output = graphene.Field(RegistrationResponse)
@@ -39,8 +28,6 @@ class RegistrationMutation(graphene.Mutation):
         current_user = info.context.user if info.context.user.is_authenticated else None
         response = register_user(input, registered_by=current_user)
         return RegistrationMutation(user=response.user, output=response)
-
-
 
 
 class LoginUser(graphene.Mutation):
@@ -71,7 +58,8 @@ class LoginUser(graphene.Mutation):
                 username=user.username,
                 token=access_token,
                 isStaff=user.is_staff,
-                isCleaner=(user.role == "is_cleaner")
+                isCleaner=(user.role == "is_cleaner"),
+                isSuperuser=user.is_superuser
             )
 
             return LoginUser(
@@ -79,9 +67,15 @@ class LoginUser(graphene.Mutation):
                 success=True,
                 message=f"{user.role} login successful"
             )
-
         except Exception as e:
             return LoginUser(success=False, message=f"An error occurred: {str(e)}")
+
+
+
+
+
+
+
 
 
 # class LoginUser(graphene.Mutation):

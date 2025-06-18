@@ -22,3 +22,4 @@ class UserLoginObject(graphene.ObjectType):
     token = graphene.String()
     isStaff = graphene.Boolean()
     isCleaner = graphene.Boolean()
+    isSuperuser = graphene.Boolean()

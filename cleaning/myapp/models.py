@@ -21,6 +21,7 @@ class CustomUser(AbstractUser):
         ('staff', 'Staff'),
         ('is_cleaner', 'Cleaner'),
         ('user', 'User'),
+        ('admin', 'Admin'),  # Added Admin role
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     registered_by = models.ForeignKey(

@@ -12,43 +12,45 @@ class UserBuilder:
     def register_user(username, password, passwordConfirm, role='user', email='', registered_by=None):
         if password != passwordConfirm:
             raise ValidationError("Passwords do not match")
-
+        
         if len(password) < 8:
             raise ValidationError("Password must be at least 8 characters long")
-
+        
         if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("Username already taken")
 
         if role not in ['user', 'staff', 'is_cleaner']:
             raise ValidationError("Invalid role")
-
+        
         if email:
             try:
                 validate_email(email)
             except DjangoValidationError:
                 raise ValidationError("Invalid email format")
-
+            
             if CustomUser.objects.filter(email=email).exists():
                 raise ValidationError("Email already taken")
 
-        user = CustomUser(
-            username=username,
-            role=role,
-            email=email,
-            registered_by=registered_by
-        )
+        # Create user with registered_by
+        user = CustomUser(username=username, role=role, email=email, registered_by=registered_by)
         user.set_password(password)
         user.is_superuser = False
-        user.is_staff = (role == 'staff')
+        user.is_staff = role == 'staff'
         user.save()
         return user
 
 
-def register_user(input):
+def register_user(input, registered_by=None):
     try:
         role = getattr(input, 'role', None) or 'user'
-        ward = getattr(input, 'cleaner', None)
-        user = UserBuilder.register_user(input.username, input.password, input.passwordConfirm, role=role, email=getattr(input, 'email', ''))
+        user = UserBuilder.register_user(
+            username=input.username,
+            password=input.password,
+            passwordConfirm=input.passwordConfirm,
+            role=role,
+            email=getattr(input, 'email', ''),
+            registered_by=registered_by
+        )
         
         return RegistrationResponse(
             message="User registration successful",
