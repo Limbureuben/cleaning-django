@@ -9,34 +9,40 @@ from cleaning_dto.cleaning import *
 
 class UserBuilder:
     @staticmethod
-    def register_user(username, password, passwordConfirm, role='user', email=''):
+    def register_user(username, password, passwordConfirm, role='user', email='', registered_by=None):
         if password != passwordConfirm:
             raise ValidationError("Passwords do not match")
-        
+
         if len(password) < 8:
             raise ValidationError("Password must be at least 8 characters long")
-        
+
         if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("Username already taken")
 
         if role not in ['user', 'staff', 'is_cleaner']:
             raise ValidationError("Invalid role")
-        
+
         if email:
             try:
                 validate_email(email)
             except DjangoValidationError:
                 raise ValidationError("Invalid email format")
-            
+
             if CustomUser.objects.filter(email=email).exists():
                 raise ValidationError("Email already taken")
 
-        user = CustomUser(username=username, role=role, email=email)
+        user = CustomUser(
+            username=username,
+            role=role,
+            email=email,
+            registered_by=registered_by
+        )
         user.set_password(password)
         user.is_superuser = False
-        user.is_staff = role == 'staff'
+        user.is_staff = (role == 'staff')
         user.save()
         return user
+
 
 def register_user(input):
     try:

@@ -17,6 +17,17 @@ class UserType(DjangoObjectType):
         fields = ("id", "username", "is_staff", "is_superuser")
 
 
+# class RegistrationMutation(graphene.Mutation):
+#     user = graphene.Field(RegistrationObject)
+#     output = graphene.Field(RegistrationResponse)
+
+#     class Arguments:
+#         input = RegistrationInputObject(required=True)
+
+#     def mutate(self, info, input):
+#         response = register_user(input)
+#         return RegistrationMutation(user=response.user, output=response)
+
 class RegistrationMutation(graphene.Mutation):
     user = graphene.Field(RegistrationObject)
     output = graphene.Field(RegistrationResponse)
@@ -25,8 +36,11 @@ class RegistrationMutation(graphene.Mutation):
         input = RegistrationInputObject(required=True)
 
     def mutate(self, info, input):
-        response = register_user(input)
+        current_user = info.context.user if info.context.user.is_authenticated else None
+        response = register_user(input, registered_by=current_user)
         return RegistrationMutation(user=response.user, output=response)
+
+
 
 
 class LoginUser(graphene.Mutation):
