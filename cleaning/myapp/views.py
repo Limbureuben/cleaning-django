@@ -14,7 +14,7 @@ from cleaningBuilders.cleaningBuilder import *
 class UserType(DjangoObjectType):
     class Meta:
         model = CustomUser
-        fields = ("id", "username", "is_staff", "is_superuser", "is_cleaner")
+        fields = ("id", "username", "is_staff", "is_superuser")
 
 
 class RegistrationMutation(graphene.Mutation):

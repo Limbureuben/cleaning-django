@@ -19,7 +19,7 @@ class UserBuilder:
         if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("Username already taken")
 
-        if role not in ['user', 'staff', 'cleaner']:
+        if role not in ['user', 'staff', 'is_cleaner']:
             raise ValidationError("Invalid role")
         
         if email:
@@ -40,7 +40,7 @@ class UserBuilder:
 
 def register_user(input):
     try:
-        role = getattr(input, 'role', 'user') or 'user'
+        role = getattr(input, 'role', None) or 'user'
         ward = getattr(input, 'cleaner', None)
         user = UserBuilder.register_user(input.username, input.password, input.passwordConfirm, role=role, email=getattr(input, 'email', ''))
         
