@@ -13,3 +13,7 @@ class RegistrationInputObject(graphene.InputObjectType):
     role = graphene.String(required=False)
     sessionId = graphene.String(required=False)
     ward = graphene.String()
+
+class RegisterObject(graphene.ObjectType):
+    id = graphene.ID()
+    username = graphene.String()
