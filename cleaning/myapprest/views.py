@@ -93,7 +93,7 @@ class SendServiceRequest(APIView):
         data = request.data.copy()
         data['user'] = request.user.id
 
-        serializer = ServiceRequestSerializer(data=data)
+        serializer = ServiceFromUserRequestSerializer(data=data)
         if serializer.is_valid():
             service_request = serializer.save(user=request.user)
             org = service_request.organization

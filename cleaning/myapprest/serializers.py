@@ -64,7 +64,6 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
     organization_image = serializers.ImageField(source='organization.image', read_only=True)
     organization_location = serializers.CharField(source='organization.location', read_only=True)
-    organization_address = serializers.CharField(source='organization.address', read_only=True)
     status = serializers.CharField(read_only=True)  # include this to show status in the response
 
     class Meta:
@@ -81,10 +80,14 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             'status',
             'organization_name',
             'organization_image',
-            'organizaion_location',
-            'organization_address'
+            'organization_location'
         ]
 
+
+class ServiceFromUserRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceRequest
+        fields = '__all__'
 
 
 
