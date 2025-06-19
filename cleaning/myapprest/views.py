@@ -66,19 +66,20 @@ class UpdateOrganizationStatusView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class OrganizationStatusView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request):
-        # Get organizations for the current logged-in user
-        organizations = Organization.objects.filter(user=request.user)
-        serializer = OrganizationSerializer(organizations, many=True)
-        return Response(serializer.data)
-
 class FetchApprovedOrganization(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         organizations = Organization.objects.filter(status="pending")
+        serializer = FetchedOrganizationSerializer(organizations, many=True, context={'request': request})
+        return Response(serializer.data)
+
+class FetchToCleaner(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Fetch all organizations that are pending approval
+        organizations = Organization.objects.filter(status="suspended")
         serializer = FetchedOrganizationSerializer(organizations, many=True, context={'request': request})
         return Response(serializer.data)
 

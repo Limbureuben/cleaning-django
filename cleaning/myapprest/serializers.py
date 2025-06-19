@@ -34,10 +34,10 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OrganizationStatusSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = ['organization_name', 'location', 'email',  'status']
+# class OrganizationStatusSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Organization
+#         fields = ['organization_name', 'location', 'email',  'status']
 
 class FetchedOrganizationSerializer(serializers.ModelSerializer):
     services_list = serializers.SerializerMethodField()
@@ -57,16 +57,21 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
         return None
 
 
+
 class ServiceRequestSerializer(serializers.ModelSerializer):
-    organization_name = serializers.CharField(source='organization.address', read_only=True)
+    organization = OrganizationSerializer(read_only=True)  # full nested object
+
     class Meta:
         model = ServiceRequest
-        fields = '__all__'
+        fields = [
+            'id', 'user', 'organization', 'username', 'email', 'phone',
+            'start_date', 'end_date', 'requested_at'
+        ]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['username', 'email']
 
 
