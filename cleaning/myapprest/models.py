@@ -46,7 +46,7 @@ class ServiceRequest(models.Model):
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
-        default='booked'
+        default='available'
     )
 
     def __str__(self):
