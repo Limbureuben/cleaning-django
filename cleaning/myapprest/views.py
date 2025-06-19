@@ -74,13 +74,14 @@ class FetchApprovedOrganization(APIView):
         serializer = FetchedOrganizationSerializer(organizations, many=True, context={'request': request})
         return Response(serializer.data)
 
+
 class FetchToCleaner(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        # Fetch all organizations that are pending approval
-        organizations = Organization.objects.filter(status="suspended")
-        serializer = FetchedOrganizationSerializer(organizations, many=True, context={'request': request})
+        # Fetch all service requests with status 'booked'
+        service_requests = ServiceRequest.objects.filter(status='available')
+        serializer = ServiceRequestSerializer(service_requests, many=True, context={'request': request})
         return Response(serializer.data)
 
 

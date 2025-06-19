@@ -30,7 +30,7 @@ class Organization(models.Model):
 
 class ServiceRequest(models.Model):
     STATUS_CHOICES = [
-        ('booked', 'Booked'),
+        ('available', 'available'),
         ('taken', 'Taken'),
     ]
 

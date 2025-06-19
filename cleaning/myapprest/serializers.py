@@ -58,17 +58,33 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
 
 
 
+# serializers.py
+
 class ServiceRequestSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
     organization_image = serializers.ImageField(source='organization.image', read_only=True)
+    organization_location = serializers.CharField(source='organization.location', read_only=True)
+    organization_address = serializers.CharField(source='organization.address', read_only=True)
+    status = serializers.CharField(read_only=True)  # include this to show status in the response
 
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'user', 'username', 'email', 'phone',
-            'start_date', 'end_date', 'requested_at',
-            'organization_name', 'organization_image'
+            'id',
+            'user',
+            'username',
+            'email',
+            'phone',
+            'start_date',
+            'end_date',
+            'requested_at',
+            'status',
+            'organization_name',
+            'organization_image',
+            'organizaion_location',
+            'organization_address'
         ]
+
 
 
 
