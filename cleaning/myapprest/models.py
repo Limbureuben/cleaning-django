@@ -26,7 +26,14 @@ class Organization(models.Model):
 
 
 
+# models.py
+
 class ServiceRequest(models.Model):
+    STATUS_CHOICES = [
+        ('booked', 'Booked'),
+        ('taken', 'Taken'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     username = models.CharField(max_length=100)
@@ -35,6 +42,15 @@ class ServiceRequest(models.Model):
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     requested_at = models.DateTimeField(auto_now_add=True)
+    
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='booked'
+    )
+
+    def __str__(self):
+        return f"{self.username} ({self.status})"
 
 
 # class Cleaner(models.Model):

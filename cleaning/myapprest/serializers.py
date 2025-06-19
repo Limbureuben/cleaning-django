@@ -59,14 +59,17 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
 
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(read_only=True)  # full nested object
+    organization_name = serializers.CharField(source='organization.name', read_only=True)
+    organization_image = serializers.ImageField(source='organization.image', read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = [
-            'id', 'user', 'organization', 'username', 'email', 'phone',
-            'start_date', 'end_date', 'requested_at'
+            'id', 'user', 'username', 'email', 'phone',
+            'start_date', 'end_date', 'requested_at',
+            'organization_name', 'organization_image'
         ]
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
