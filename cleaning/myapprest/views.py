@@ -230,7 +230,7 @@ class SubmitCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        print("📥 Incoming cleaner request:", request.data)
+        # print("📥 Incoming cleaner request:", request.data)
 
         service_request_id = request.data.get('service_request')  # booked house ID
         username = request.data.get('username')
@@ -302,3 +302,21 @@ class SubmitCleanerRequestAPIView(APIView):
 
         except ServiceRequest.DoesNotExist:
             return Response({'detail': 'Service request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CleanerRequestsFromCleanerAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        requests = CleanerRequest.objects.filter(from_user=request.user).order_by('-created_at')
+        serializer = CleanerRequestSerializer(requests, many=True)
+        return Response(serializer.data)
+
+
+class CleanerRequestsToStaffAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        requests = CleanerRequest.objects.filter(to_user=request.user).order_by('-created_at')
+        serializer = CleanerRequestSerializer(requests, many=True)
+        return Response(serializer.data)
