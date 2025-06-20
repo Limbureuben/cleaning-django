@@ -25,7 +25,6 @@ class Organization(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
 
-
 # models.py
 
 class ServiceRequest(models.Model):
@@ -53,25 +52,6 @@ class ServiceRequest(models.Model):
         return f"{self.username} ({self.status})"
 
 
-# class Cleaner(models.Model):
-#     STATUS_CHOICES = [
-#         ('available', 'Available'),
-#         ('assigned', 'Assigned'),
-#         ('inactive', 'Inactive'),
-#         ('busy', 'Busy'),
-#     ]
-
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     full_name = models.CharField(max_length=100)
-#     location = models.CharField(max_length=100, null=True)
-#     contact = models.CharField(max_length=20)
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
-
-#     def __str__(self):
-#         return f"{self.full_name} - {self.status}"
-
-
-
 class Cleaner(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -89,3 +69,23 @@ class Cleaner(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.status}"
+
+class CleanerRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('completed', 'Completed'),
+    ]
+
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='cleaner_requests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_requests', on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    cleaner_location = models.CharField(max_length=255)
+    username = models.CharField(max_length=100)
+    email = models.EmailField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')  # 🟢 new
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.username} → {self.organization.organization_name} ({self.status})"

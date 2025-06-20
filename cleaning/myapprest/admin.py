@@ -18,3 +18,8 @@ class CleanerAdmin(admin.ModelAdmin):
     list_display = ('registered_by', 'auth_user', 'full_name', 'contact', 'location', 'contact', 'status')
     search_fields = ('registered_by', 'full_name')
 admin.site.register(Cleaner, CleanerAdmin)
+
+class CleanerRequestAdmin(admin.ModelAdmin):
+    list_display = ('from_user', 'to_user', 'organization', 'cleaner_location', 'username', 'email')
+    search_fields = ('from_user', 'to_user', 'organization', 'username')
+admin.site.register(CleanerRequest, CleanerRequestAdmin)

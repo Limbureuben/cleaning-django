@@ -62,9 +62,12 @@ class FetchedOrganizationSerializer(serializers.ModelSerializer):
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
-    organization_image = serializers.ImageField(source='organization.image', read_only=True)
+    organization_image = serializers.ImageField(source='organization.file', read_only=True)
     organization_location = serializers.CharField(source='organization.location', read_only=True)
+    # organization_services = serializers.CharField(source='organization.services', read_only=True)
     status = serializers.CharField(read_only=True)  # include this to show status in the response
+
+    # services_list = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
@@ -80,8 +83,12 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             'status',
             'organization_name',
             'organization_image',
-            'organization_location'
+            'organization_location',
         ]
+
+        # def get_services_list(self, obj):
+        #     return obj.organization_services.split(', ') if obj.organization_services else []
+
 
 
 class ServiceFromUserRequestSerializer(serializers.ModelSerializer):
@@ -95,7 +102,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username', 'email']
-
 
 
 # serializers.py
@@ -115,7 +121,6 @@ class CleanerSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         registered_by = self.context['request'].user
 
-        # ✅ Check for unique username
         if User.objects.filter(username=username).exists():
             raise ValidationError({'username': 'This username is already taken.'})
 
