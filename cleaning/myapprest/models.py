@@ -79,6 +79,7 @@ class CleanerRequest(models.Model):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
         ('completed', 'Completed'),
+        ('cancelled', 'Cancelled')
     ]
 
     from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='cleaner_requests', on_delete=models.CASCADE)

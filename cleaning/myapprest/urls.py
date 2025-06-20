@@ -15,4 +15,6 @@ urlpatterns = [
     path('client-send-service-request/', SubmitCleanerRequestAPIView.as_view(), name='submit-cleaner-request'),
     path('cleaner-requests/from-cleaner/', CleanerRequestsFromCleanerAPIView.as_view()),
     path('cleaner-requests/to-staff/', CleanerRequestsToStaffAPIView.as_view(), name='cleaner-requests-to-staff'),
+    path('cancel-cleaner-request/<int:request_id>/', CancelCleanerRequestAPIView.as_view(), name='cancel-cleaner-request'),
+    path('delete-cleaner-request/<int:pk>/', DeleteCleanerRequestAPIView.as_view(), name='delete-cleaner-request'),
 ]

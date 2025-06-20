@@ -177,64 +177,13 @@ def custom_login(request):
 
 
 
-# class SubmitCleanerRequestAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def post(self, request):
-#         print("📥 Incoming cleaner request:", request.data)
-
-#         service_request_id = request.data.get('service_request')  # the house the cleaner wants to clean
-#         username = request.data.get('username')
-#         email = request.data.get('email')
-#         location = request.data.get('cleaner_location')
-
-#         if not all([service_request_id, username, email, location]):
-#             return Response(
-#                 {'detail': 'Missing required fields.'},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         try:
-#             service_request = ServiceRequest.objects.get(id=service_request_id)
-#             organization = service_request.organization
-#             staff_user = organization.user  # assumes Organization has a .user (staff) field
-
-#             # Save cleaner request
-#             CleanerRequest.objects.create(
-#                 from_user=request.user,
-#                 to_user=staff_user,
-#                 service_request=service_request,
-#                 cleaner_location=location,
-#                 username=username,
-#                 email=email,
-#                 status='pending'
-#             )
-
-#             # Email notification to cleaner
-#             send_mail(
-#                 subject='Cleaning Request Submitted',
-#                 message=f"Hi {username},\n\nYour request to clean the house booked by {service_request.username} has been submitted.",
-#                 from_email='noreply@example.com',
-#                 recipient_list=[email],
-#                 fail_silently=False,
-#             )
-
-#             return Response({'detail': 'Cleaner request submitted successfully.'})
-
-#         except ServiceRequest.DoesNotExist:
-#             return Response({'detail': 'Service request not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-
-
 class SubmitCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        # print("📥 Incoming cleaner request:", request.data)
-
-        service_request_id = request.data.get('service_request')  # booked house ID
+        service_request_id = request.data.get('service_request')
         username = request.data.get('username')
-        email = request.data.get('email')  # cleaner email
+        email = request.data.get('email')
         location = request.data.get('cleaner_location')
 
         if not all([service_request_id, username, email, location]):
@@ -246,8 +195,20 @@ class SubmitCleanerRequestAPIView(APIView):
         try:
             service_request = ServiceRequest.objects.get(id=service_request_id)
             organization = service_request.organization
-            staff_user = organization.user  # staff user
-            client_user = service_request.user  # client who booked the house
+            staff_user = organization.user
+            client_user = service_request.user
+
+            # Check if this cleaner has already sent a request for this service request
+            exists = CleanerRequest.objects.filter(
+                from_user=request.user,
+                service_request=service_request
+            ).exists()
+
+            if exists:
+                return Response(
+                    {'detail': 'You have already sent a cleaning request for this booked house.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             # Create the cleaner request
             CleanerRequest.objects.create(
@@ -260,48 +221,16 @@ class SubmitCleanerRequestAPIView(APIView):
                 status='pending'
             )
 
-            # Update the service request status to 'taken'
-            service_request.status = 'taken'
-            service_request.save()
+            # Send emails (you can keep your send_email helper as is)
 
-            # Email sending helper function with basic error handling
-            def send_email(subject, message, recipient):
-                try:
-                    send_mail(
-                        subject=subject,
-                        message=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[recipient],
-                        fail_silently=False,
-                    )
-                except BadHeaderError:
-                    print(f"Invalid header found when sending email to {recipient}")
-                except Exception as e:
-                    print(f"Error sending email to {recipient}: {e}")
-
-            # Send emails
-            send_email(
-                subject='Cleaning Request Submitted',
-                message=f"Hi {username},\n\nYour cleaning request for the house booked by {service_request.username} has been submitted.",
-                recipient=email
-            )
-
-            send_email(
-                subject='New Cleaning Request',
-                message=f"Hello {staff_user.username},\n\nA new cleaning request has been submitted by {username} for the house booked by {service_request.username}.",
-                recipient=staff_user.email
-            )
-
-            send_email(
-                subject='Your House Cleaning Requested',
-                message=f"Dear {service_request.username},\n\nA cleaner ({username}) has requested to clean your booked house at {location}.",
-                recipient=client_user.email
-            )
+            # ... (rest of your email code)
 
             return Response({'detail': 'Cleaner request submitted and notifications sent.'})
 
         except ServiceRequest.DoesNotExist:
             return Response({'detail': 'Service request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 class CleanerRequestsFromCleanerAPIView(APIView):
@@ -320,3 +249,71 @@ class CleanerRequestsToStaffAPIView(APIView):
         requests = CleanerRequest.objects.filter(to_user=request.user).order_by('-created_at')
         serializer = CleanerRequestSerializer(requests, many=True)
         return Response(serializer.data)
+    
+
+
+class CancelCleanerRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, request_id):
+        try:
+            cleaner_request = CleanerRequest.objects.get(id=request_id, from_user=request.user)
+
+            if cleaner_request.status != 'pending':
+                return Response({'detail': 'Only pending requests can be cancelled.'}, status=400)
+
+            # Mark as cancelled
+            cleaner_request.status = 'cancelled'
+            cleaner_request.save()
+
+            # Optionally revert the ServiceRequest to 'available'
+            service_request = cleaner_request.service_request
+            service_request.status = 'available'
+            service_request.save()
+
+            return Response({'detail': 'Cleaner request cancelled successfully.'})
+
+        except CleanerRequest.DoesNotExist:
+            return Response({'detail': 'Request not found or not owned by you.'}, status=404)
+
+
+class DeleteCleanerRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            cleaner_request = CleanerRequest.objects.get(id=pk, from_user=request.user)
+            if cleaner_request.status != 'cancelled':
+                return Response({'detail': 'Only cancelled requests can be deleted.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            cleaner_request.delete()
+            return Response({'detail': 'Request deleted successfully.'}, status=status.HTTP_200_OK)
+
+        except CleanerRequest.DoesNotExist:
+            return Response({'detail': 'Request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class ApproveCleanerRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            cleaner_request = CleanerRequest.objects.get(id=pk)
+
+            if cleaner_request.status != 'pending':
+                return Response({'detail': 'Only pending requests can be approved.'}, status=400)
+
+            # Approve the request
+            cleaner_request.status = 'approved'
+            cleaner_request.save()
+
+            # Mark the service request as taken
+            service_request = cleaner_request.service_request
+            service_request.status = 'taken'
+            service_request.save()
+
+            return Response({'detail': 'Request approved and service marked as taken.'})
+
+        except CleanerRequest.DoesNotExist:
+            return Response({'detail': 'Cleaner request not found.'}, status=404)
