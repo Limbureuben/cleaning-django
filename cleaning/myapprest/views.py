@@ -10,6 +10,7 @@ from rest_framework.authtoken.models import Token # type: ignore
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view # type: ignore
+from django.core.mail import send_mail
 
 
 class RegisterOrganizationView(APIView):
@@ -173,3 +174,46 @@ def custom_login(request):
         'username': user.username,
         'role': role
     })
+
+
+
+class SubmitCleanerRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        org_id = request.data.get('organization')
+        cleaner_location = request.data.get('cleaner_location')
+        username = request.data.get('username')
+        email = request.data.get('email')
+
+        if not org_id or not cleaner_location:
+            return Response({'detail': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            organization = Organization.objects.get(id=org_id)
+            staff_user = organization.user  # this is your target staff
+
+            # Save the request
+            CleanerRequest.objects.create(
+                from_user=request.user,
+                to_user=staff_user,
+                organization=organization,
+                cleaner_location=cleaner_location,
+                username=username,
+                email=email,
+                status='pending'
+            )
+
+            # Send email to cleaner
+            send_mail(
+                subject='Service Request Submitted',
+                message=f"Dear {username}, your request to clean '{organization.organization_name}' has been submitted.",
+                from_email='noreply@example.com',
+                recipient_list=[email],
+                fail_silently=False,
+            )
+
+            return Response({'detail': 'Cleaner request submitted successfully.'})
+
+        except Organization.DoesNotExist:
+            return Response({'detail': 'Organization not found'}, status=status.HTTP_404_NOT_FOUND)
