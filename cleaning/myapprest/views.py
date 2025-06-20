@@ -294,6 +294,7 @@ class DeleteCleanerRequestAPIView(APIView):
 
 
 
+
 class ApproveCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -317,3 +318,32 @@ class ApproveCleanerRequestAPIView(APIView):
 
         except CleanerRequest.DoesNotExist:
             return Response({'detail': 'Cleaner request not found.'}, status=404)
+
+
+class CleanerRequestRejectAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        reason = request.data.get('reason')
+        if not reason:
+            return Response({'detail': 'Rejection reason is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            cleaner_request = CleanerRequest.objects.get(pk=pk)
+            cleaner_request.status = 'rejected'
+            cleaner_request.rejection_reason = reason  # Add this field to your model
+            cleaner_request.save()
+
+            # Send rejection email to cleaner
+            send_mail(
+                subject='Cleaning Request Rejected',
+                message=f"Your cleaning request was rejected for the following reason:\n\n{reason}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[cleaner_request.email],
+                fail_silently=False,
+            )
+
+            return Response({'detail': 'Request rejected and cleaner notified.'})
+
+        except CleanerRequest.DoesNotExist:
+            return Response({'detail': 'Request not found.'}, status=status.HTTP_404_NOT_FOUND)

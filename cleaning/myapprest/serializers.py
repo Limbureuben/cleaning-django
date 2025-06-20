@@ -140,9 +140,9 @@ class CleanerSerializer(serializers.ModelSerializer):
 
 
 class CleanerRequestSerializer(serializers.ModelSerializer):
-    organization_name = serializers.CharField(source='organization.organization_name', read_only=True)
+    organization_location = serializers.CharField(source='organization.location', read_only=True)
     service_request_username = serializers.CharField(source='service_request.username', read_only=True)
 
     class Meta:
         model = CleanerRequest
-        fields = ['id', 'username', 'email', 'cleaner_location', 'status', 'created_at', 'organization_name', 'service_request_username']
+        fields = ['id', 'username', 'email', 'cleaner_location', 'status', 'created_at', 'organization_location', 'service_request_username']
