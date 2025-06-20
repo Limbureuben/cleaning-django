@@ -52,6 +52,7 @@ class ServiceRequest(models.Model):
         return f"{self.username} ({self.status})"
 
 
+
 class Cleaner(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -70,6 +71,8 @@ class Cleaner(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.status}"
 
+
+
 class CleanerRequest(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -80,12 +83,12 @@ class CleanerRequest(models.Model):
 
     from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='cleaner_requests', on_delete=models.CASCADE)
     to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_requests', on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    service_request = models.ForeignKey('ServiceRequest', null=True, on_delete=models.CASCADE)  # ✅ NEW
     cleaner_location = models.CharField(max_length=255)
     username = models.CharField(max_length=100)
     email = models.EmailField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')  # 🟢 new
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.username} → {self.organization.organization_name} ({self.status})"
+        return f"{self.username} → {self.service_request} ({self.status})"

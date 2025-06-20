@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token # type: ignore
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view # type: ignore
-from django.core.mail import send_mail
+from django.core.mail import send_mail, BadHeaderError
 
 
 class RegisterOrganizationView(APIView):
@@ -177,43 +177,128 @@ def custom_login(request):
 
 
 
+# class SubmitCleanerRequestAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request):
+#         print("📥 Incoming cleaner request:", request.data)
+
+#         service_request_id = request.data.get('service_request')  # the house the cleaner wants to clean
+#         username = request.data.get('username')
+#         email = request.data.get('email')
+#         location = request.data.get('cleaner_location')
+
+#         if not all([service_request_id, username, email, location]):
+#             return Response(
+#                 {'detail': 'Missing required fields.'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         try:
+#             service_request = ServiceRequest.objects.get(id=service_request_id)
+#             organization = service_request.organization
+#             staff_user = organization.user  # assumes Organization has a .user (staff) field
+
+#             # Save cleaner request
+#             CleanerRequest.objects.create(
+#                 from_user=request.user,
+#                 to_user=staff_user,
+#                 service_request=service_request,
+#                 cleaner_location=location,
+#                 username=username,
+#                 email=email,
+#                 status='pending'
+#             )
+
+#             # Email notification to cleaner
+#             send_mail(
+#                 subject='Cleaning Request Submitted',
+#                 message=f"Hi {username},\n\nYour request to clean the house booked by {service_request.username} has been submitted.",
+#                 from_email='noreply@example.com',
+#                 recipient_list=[email],
+#                 fail_silently=False,
+#             )
+
+#             return Response({'detail': 'Cleaner request submitted successfully.'})
+
+#         except ServiceRequest.DoesNotExist:
+#             return Response({'detail': 'Service request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 class SubmitCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        org_id = request.data.get('organization')
-        cleaner_location = request.data.get('cleaner_location')
-        username = request.data.get('username')
-        email = request.data.get('email')
+        print("📥 Incoming cleaner request:", request.data)
 
-        if not org_id or not cleaner_location:
-            return Response({'detail': 'Missing data'}, status=status.HTTP_400_BAD_REQUEST)
+        service_request_id = request.data.get('service_request')  # booked house ID
+        username = request.data.get('username')
+        email = request.data.get('email')  # cleaner email
+        location = request.data.get('cleaner_location')
+
+        if not all([service_request_id, username, email, location]):
+            return Response(
+                {'detail': 'Missing required fields.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
-            organization = Organization.objects.get(id=org_id)
-            staff_user = organization.user  # this is your target staff
+            service_request = ServiceRequest.objects.get(id=service_request_id)
+            organization = service_request.organization
+            staff_user = organization.user  # staff user
+            client_user = service_request.user  # client who booked the house
 
-            # Save the request
+            # Create the cleaner request
             CleanerRequest.objects.create(
                 from_user=request.user,
                 to_user=staff_user,
-                organization=organization,
-                cleaner_location=cleaner_location,
+                service_request=service_request,
+                cleaner_location=location,
                 username=username,
                 email=email,
                 status='pending'
             )
 
-            # Send email to cleaner
-            send_mail(
-                subject='Service Request Submitted',
-                message=f"Dear {username}, your request to clean '{organization.organization_name}' has been submitted.",
-                from_email='noreply@example.com',
-                recipient_list=[email],
-                fail_silently=False,
+            # Update the service request status to 'taken'
+            service_request.status = 'taken'
+            service_request.save()
+
+            # Email sending helper function with basic error handling
+            def send_email(subject, message, recipient):
+                try:
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[recipient],
+                        fail_silently=False,
+                    )
+                except BadHeaderError:
+                    print(f"Invalid header found when sending email to {recipient}")
+                except Exception as e:
+                    print(f"Error sending email to {recipient}: {e}")
+
+            # Send emails
+            send_email(
+                subject='Cleaning Request Submitted',
+                message=f"Hi {username},\n\nYour cleaning request for the house booked by {service_request.username} has been submitted.",
+                recipient=email
             )
 
-            return Response({'detail': 'Cleaner request submitted successfully.'})
+            send_email(
+                subject='New Cleaning Request',
+                message=f"Hello {staff_user.username},\n\nA new cleaning request has been submitted by {username} for the house booked by {service_request.username}.",
+                recipient=staff_user.email
+            )
 
-        except Organization.DoesNotExist:
-            return Response({'detail': 'Organization not found'}, status=status.HTTP_404_NOT_FOUND)
+            send_email(
+                subject='Your House Cleaning Requested',
+                message=f"Dear {service_request.username},\n\nA cleaner ({username}) has requested to clean your booked house at {location}.",
+                recipient=client_user.email
+            )
+
+            return Response({'detail': 'Cleaner request submitted and notifications sent.'})
+
+        except ServiceRequest.DoesNotExist:
+            return Response({'detail': 'Service request not found.'}, status=status.HTTP_404_NOT_FOUND)
