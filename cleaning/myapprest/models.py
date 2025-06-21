@@ -107,13 +107,25 @@ class Notification(models.Model):
 
 
 
-class CleanerRating(models.Model):
-    cleaner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_received')
-    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_given')
-    service_request = models.OneToOneField(ServiceRequest, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField()  # 1 to 5
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class CleanerRating(models.Model):
+#     cleaner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_received')
+#     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_given')
+#     service_request = models.OneToOneField(ServiceRequest, on_delete=models.CASCADE)
+#     rating = models.PositiveIntegerField()  # 1 to 5
+#     comment = models.TextField(blank=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.client.username} → {self.cleaner.username} ({self.rating})"
+
+
+class CleaningReport(models.Model):
+    cleaner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='cleaning_reports')
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.CASCADE, related_name='cleaning_reports')
+    description = models.TextField()
+    completed_at = models.DateField()
+    attachment = models.FileField(upload_to='cleaning_reports/', null=True, blank=True)
+    client_rating = models.PositiveSmallIntegerField(null=True, blank=True)  # Rating out of 5?
 
     def __str__(self):
-        return f"{self.client.username} → {self.cleaner.username} ({self.rating})"
+        return f"Report by {self.cleaner.username} on Request #{self.service_request.id}"

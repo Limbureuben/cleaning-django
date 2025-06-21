@@ -152,3 +152,16 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ['id', 'title', 'message', 'is_read', 'created_at']
+
+
+
+class CleaningReportSerializer(serializers.ModelSerializer):
+    cleaner = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = CleaningReport
+        fields = [
+            'id', 'cleaner', 'service_request', 'description',
+            'completed_at', 'attachment', 'client_rating'
+        ]
+        read_only_fields = ['id', 'cleaner', 'client_rating']

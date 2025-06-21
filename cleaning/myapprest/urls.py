@@ -19,7 +19,10 @@ urlpatterns = [
     path('delete-cleaner-request/<int:pk>/', DeleteCleanerRequestAPIView.as_view(), name='delete-cleaner-request'),
     path('cleaner-requests/<int:pk>/approve/', ApproveCleanerRequestAPIView.as_view(), name='approve-cleaner-request'),
     path('cleaner-requests/<int:pk>/reject/', CleanerRequestRejectAPIView.as_view(), name='reject-cleaner-request'),
-    path('api/notifications/', NotificationListAPIView.as_view(), name='notifications'),
-    path('api/notifications/<int:pk>/mark-read/', MarkNotificationAsReadAPIView.as_view(), name='mark-notification-read'),
-    path('api/notifications/unread-count/', UnreadNotificationCountAPIView.as_view(), name='unread-notification-count'),
+    path('notifications/', NotificationListAPIView.as_view(), name='notifications'),
+    path('notifications/<int:pk>/mark-read/', MarkNotificationAsReadAPIView.as_view(), name='mark-notification-read'),
+    path('notifications/unread-count/', UnreadNotificationCountAPIView.as_view(), name='unread-notification-count'),
+    path('notifications/<int:pk>/delete/', DeleteNotificationAPIView.as_view(), name='delete-notification'),
+    path('cleaning-reports/', CleaningReportAPIView.as_view(), name='cleaning-reports'),
+    path('cleaning-reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-cleaner-report'),
 ]

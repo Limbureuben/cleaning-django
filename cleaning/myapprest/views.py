@@ -86,7 +86,6 @@ class FetchToCleaner(APIView):
         return Response(serializer.data)
 
 
-
 class SendServiceRequest(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -480,7 +479,6 @@ def create_notification(user, title, message):
     Notification.objects.create(user=user, title=title, message=message)
 
 
-
 class NotificationListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -512,29 +510,93 @@ class UnreadNotificationCountAPIView(APIView):
 
 
 
-class SubmitCleanerRatingAPIView(APIView):
+class DeleteNotificationAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def delete(self, request, pk):
+        try:
+            notification = Notification.objects.get(id=pk, user=request.user)
+            notification.delete()
+            return Response({"detail": "Notification deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except Notification.DoesNotExist:
+            return Response({"detail": "Notification not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+# class SubmitCleanerRatingAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request):
+#         cleaner_id = request.data.get('cleaner_id')
+#         service_id = request.data.get('service_request_id')
+#         rating = request.data.get('rating')
+#         comment = request.data.get('comment', '')
+
+#         if not all([cleaner_id, service_id, rating]):
+#             return Response({'detail': 'Missing data'}, status=400)
+
+#         cleaner = User.objects.get(id=cleaner_id)
+#         service = ServiceRequest.objects.get(id=service_id)
+
+#         CleanerRating.objects.create(
+#             cleaner=cleaner,
+#             client=request.user,
+#             service_request=service,
+#             rating=rating,
+#             comment=comment
+#         )
+
+#         return Response({'detail': 'Rating submitted successfully'})
+
+
+
+
+class CleaningReportAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Staff sees all reports, others see only related reports
+        if user.is_staff:
+            reports = CleaningReport.objects.all()
+        else:
+            reports = CleaningReport.objects.filter(
+                models.Q(cleaner=user) | models.Q(service_request__booked_by=user)
+            )
+        serializer = CleaningReportSerializer(reports, many=True)
+        return Response(serializer.data)
+
     def post(self, request):
-        cleaner_id = request.data.get('cleaner_id')
-        service_id = request.data.get('service_request_id')
-        rating = request.data.get('rating')
-        comment = request.data.get('comment', '')
+        data = request.data.copy()
+        data['cleaner'] = request.user.id  # ensure the report is tied to the logged-in user
 
-        if not all([cleaner_id, service_id, rating]):
-            return Response({'detail': 'Missing data'}, status=400)
+        serializer = CleaningReportSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        cleaner = User.objects.get(id=cleaner_id)
-        service = ServiceRequest.objects.get(id=service_id)
-
-        CleanerRating.objects.create(
-            cleaner=cleaner,
-            client=request.user,
-            service_request=service,
-            rating=rating,
-            comment=comment
-        )
-
-        return Response({'detail': 'Rating submitted successfully'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
+class CleanerReportRatingAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            report = CleaningReport.objects.get(pk=pk)
+        except CleaningReport.DoesNotExist:
+            return Response({'detail': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user != report.service_request.booked_by:
+            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+
+        rating = request.data.get('client_rating')
+        if not rating or not (1 <= int(rating) <= 5):
+            return Response({'detail': 'Invalid rating (1-5)'}, status=status.HTTP_400_BAD_REQUEST)
+
+        report.client_rating = int(rating)
+        report.save()
+        return Response({'detail': 'Rating saved successfully'})
