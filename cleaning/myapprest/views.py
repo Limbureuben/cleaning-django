@@ -351,68 +351,6 @@ class DeleteCleanerRequestAPIView(APIView):
 
 
 
-# class ApproveCleanerRequestAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def patch(self, request, pk):
-#         try:
-#             cleaner_request = CleanerRequest.objects.get(id=pk)
-
-#             if cleaner_request.status != 'pending':
-#                 return Response({'detail': 'Only pending requests can be approved.'}, status=400)
-
-#             # Approve the request
-#             cleaner_request.status = 'approved'
-#             cleaner_request.save()
-
-#             # Mark the service request as taken
-#             service_request = cleaner_request.service_request
-#             service_request.status = 'taken'
-#             service_request.save()
-
-#             # Send email to client with cleaner details
-#             client_email = service_request.email
-#             cleaner = cleaner_request.from_user
-#             subject = "🏠 Cleaner Assigned for Your Booked House"
-
-#             message = f"""
-# Hello {service_request.username},
-
-# We are happy to inform you that a cleaner has been assigned to clean the house you booked.
-
-# Cleaner Details:
-# ------------------------------
-# Name: {cleaner.username}
-# Location: {cleaner_request.cleaner_location}
-# ✉️ Email: {cleaner.email}
-# 📅 Start Date: {service_request.start_date}
-# 📅 End Date: {service_request.end_date}
-
-# Status: Approved and scheduled for cleaning.
-
-# If you have any questions, feel free to reply to this email.
-
-# Thank you for using our service.
-
-# Sincerely,
-# Open Space Cleaning Team
-# """
-
-#             send_mail(
-#                 subject=subject,
-#                 message=message,
-#                 from_email=settings.DEFAULT_FROM_EMAIL,
-#                 recipient_list=[client_email],
-#                 fail_silently=False,
-#             )
-
-#             return Response({'detail': 'Request approved, service marked as taken, and cleaner details sent to client.'})
-
-#         except CleanerRequest.DoesNotExist:
-#             return Response({'detail': 'Cleaner request not found.'}, status=404)
-
-
-
 
 class ApproveCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -454,27 +392,27 @@ class ApproveCleanerRequestAPIView(APIView):
             subject_client = "Cleaner Assigned for Your Booked House"
 
             message_client = f"""
-Hello {client.username},
+            Hello {client.username},
 
-We are happy to inform you that a cleaner has been assigned to clean the house you booked.
+            We are happy to inform you that a cleaner has been assigned to clean the house you booked.
 
-Cleaner Details:
-------------------------------
-Name: {cleaner.username}
-Location: {cleaner_request.cleaner_location}
-✉️ Email: {cleaner.email}
-📅 Start Date: {service_request.start_date}
-📅 End Date: {service_request.end_date}
+            Cleaner Details:
+            ------------------------------
+            Name: {cleaner.username}
+            Location: {cleaner_request.cleaner_location}
+            ✉️ Email: {cleaner.email}
+            📅 Start Date: {service_request.start_date}
+            📅 End Date: {service_request.end_date}
 
-Status: Approved and scheduled for cleaning.
+            Status: Approved and scheduled for cleaning.
 
-If you have any questions, feel free to reply to this email.
+            If you have any questions, feel free to reply to this email.
 
-Thank you for using our service.
+            Thank you for using our service.
 
-Sincerely,
-Open Space Cleaning Team
-"""
+            Sincerely,
+            Open Space Cleaning Team
+            """
 
             send_mail(
                 subject=subject_client,
@@ -634,6 +572,26 @@ class CleaningReportAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class StaffCleanersAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        staff_user = request.user
+
+        if staff_user.role != 'staff':
+            return Response({'error': 'Only staff can view registered cleaners.'}, status=403)
+
+        # Get users with role 'is_cleaner' registered by this staff
+        cleaners = CustomUser.objects.filter(role='is_cleaner', registered_by=staff_user)
+
+        serializer = CleanerSerializer(cleaners, many=True)
+
+        return Response({
+            'total_cleaners': cleaners.count(),
+            'cleaners': serializer.data
+        })
 
 
 

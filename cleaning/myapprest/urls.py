@@ -26,4 +26,5 @@ urlpatterns = [
     path('notifications/<int:pk>/delete/', DeleteNotificationAPIView.as_view(), name='delete-notification'),
     path('cleaning-reports/', CleaningReportAPIView.as_view(), name='cleaning-reports'),
     path('cleaning-reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-cleaner-report'),
+    path('staff/cleaners/', StaffCleanersAPIView.as_view(), name='staff-cleaners'),
 ]
