@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view # type: ignore
 from django.core.mail import send_mail, BadHeaderError
 
 
+
 class RegisterOrganizationView(APIView):
     # Only allow authenticated users to register organizations
     permission_classes = [permissions.IsAuthenticated]
@@ -101,6 +102,37 @@ class SendServiceRequest(APIView):
             org.save()
             return Response({"success": "Request sent successfully"}, status=201)
         return Response(serializer.errors, status=400)
+
+
+# class SendServiceRequest(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request):
+#         user = request.user
+#         data = request.data.copy()
+#         data['user'] = user.id
+#         organization_id = data.get('organization')
+
+#         if ServiceFromUserRequest.objects.filter(user=user, organization_id=organization_id).exists():
+#             return Response(
+#                 {"error": "You have already sent a request to this organization."},
+#                 status=400
+#             )
+
+#         serializer = ServiceFromUserRequestSerializer(data=data)
+#         if serializer.is_valid():
+#             service_request = serializer.save(user=user)
+            
+#             # Optionally suspend the organization after request
+#             org = service_request.organization
+#             org.status = 'suspended'
+#             org.save()
+
+#             return Response({"success": "Request sent successfully"}, status=201)
+        
+#         return Response(serializer.errors, status=400)
+
+
 
 
 class UserProfileView(APIView):
@@ -231,14 +263,40 @@ class SubmitCleanerRequestAPIView(APIView):
 
 
 
+# class CleanerRequestsFromCleanerAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get(self, request):
+#         requests = CleanerRequest.objects.filter(from_user=request.user).order_by('-created_at')
+#         serializer = CleanerRequestSerializer(requests, many=True)
+#         return Response(serializer.data)
 
 class CleanerRequestsFromCleanerAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        requests = CleanerRequest.objects.filter(from_user=request.user).order_by('-created_at')
+        requests = CleanerRequest.objects.filter(
+            from_user=request.user
+        ).exclude(
+            status='approved'
+        ).order_by('-created_at')
+
         serializer = CleanerRequestSerializer(requests, many=True)
         return Response(serializer.data)
+    
+
+class CleanerRequestsApprovedFromCleanerAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        requests = CleanerRequest.objects.filter(
+            from_user=request.user,
+            status='approved'  # Only approved
+        ).order_by('-created_at')
+
+        serializer = CleanerRequestSerializer(requests, many=True)
+        return Response(serializer.data)
+
 
 
 class CleanerRequestsToStaffAPIView(APIView):
@@ -568,13 +626,12 @@ class CleaningReportAPIView(APIView):
 
     def post(self, request):
         data = request.data.copy()
-        data['cleaner'] = request.user.id  # ensure the report is tied to the logged-in user
-
+        data['cleaner'] = request.user.id  # Add this line to ensure cleaner is included
         serializer = CleaningReportSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        if serializer.is_valid():
+            serializer.save(cleaner=request.user)  # Pass the cleaner explicitly
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

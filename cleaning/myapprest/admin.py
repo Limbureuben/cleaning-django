@@ -29,3 +29,9 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'message', 'is_read', 'created_at')
     search_fields = ('user', 'message')
 admin.site.register(Notification, NotificationAdmin)
+
+
+class CleaningReportAdmin(admin.ModelAdmin):
+    list_display = ('cleaner', 'service_request', 'description', 'completed_at', 'client_rating')
+    search_fields = ('cleaner', 'service_request')
+admin.site.register(CleaningReport, CleaningReportAdmin)

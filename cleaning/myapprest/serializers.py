@@ -156,12 +156,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 
 class CleaningReportSerializer(serializers.ModelSerializer):
-    cleaner = serializers.StringRelatedField(read_only=True)
-
     class Meta:
         model = CleaningReport
-        fields = [
-            'id', 'cleaner', 'service_request', 'description',
-            'completed_at', 'attachment', 'client_rating'
-        ]
-        read_only_fields = ['id', 'cleaner', 'client_rating']
+        fields = '__all__'
+        read_only_fields = ['cleaner']  # Prevent user from injecting wrong cleaner ID
