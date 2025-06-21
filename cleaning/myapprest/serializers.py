@@ -1,6 +1,41 @@
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers # type: ignore
 from .models import *
+from django.contrib.auth.password_validation import validate_password
+
+
+
+class RegisterCleanerSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    passwordConfirm = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'password', 'passwordConfirm', 'role']
+
+    def validate(self, data):
+        if data['password'] != data['passwordConfirm']:
+            raise serializers.ValidationError("Passwords do not match")
+
+        if CustomUser.objects.filter(username=data['username']).exists():
+            raise serializers.ValidationError("Username already taken")
+
+        if CustomUser.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError("Email already taken")
+
+        if data['role'] != 'is_cleaner':
+            raise serializers.ValidationError("Only 'is_cleaner' role is allowed")
+
+        validate_password(data['password'])
+        return data
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        validated_data.pop('passwordConfirm')
+        user = CustomUser(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 class RegisterOrganizationSerializer(serializers.ModelSerializer):
     services = serializers.ListField(

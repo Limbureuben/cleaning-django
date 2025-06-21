@@ -11,7 +11,26 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view # type: ignore
 from django.core.mail import send_mail, BadHeaderError
+from django.contrib.auth.password_validation import validate_password
 
+
+
+class RegisterCleanerAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'staff':
+            return Response({"error": "Only staff can register cleaners."}, status=403)
+
+        data = request.data.copy()
+        data['registered_by'] = request.user.id  # This will be passed manually if your model allows
+
+        serializer = RegisterCleanerSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(registered_by=request.user)
+            return Response({"success": "Cleaner registered successfully"}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterOrganizationView(APIView):

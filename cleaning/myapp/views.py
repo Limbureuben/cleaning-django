@@ -24,22 +24,8 @@ class RegistrationMutation(graphene.Mutation):
     class Arguments:
         input = RegistrationInputObject(required=True)
 
-    # def mutate(self, info, input):
-    #     current_user = info.context.user if info.context.user.is_authenticated else None
-    #     response = register_user(input, registered_by=current_user)
-    #     return RegistrationMutation(user=response.user, output=response)
-
     def mutate(self, info, input):
-        current_user = info.context.user
-
-        # Ensure the user is logged in
-        if not current_user.is_authenticated:
-            raise Exception("Authentication required")
-
-        # If trying to register a cleaner, ensure the current user is staff
-        if input.role == 'is_cleaner' and current_user.role != 'staff':
-            raise Exception("Only staff can register cleaners")
-
+        current_user = info.context.user if info.context.user.is_authenticated else None
         response = register_user(input, registered_by=current_user)
         return RegistrationMutation(user=response.user, output=response)
 
