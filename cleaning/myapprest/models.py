@@ -93,3 +93,16 @@ class CleanerRequest(models.Model):
 
     def __str__(self):
         return f"{self.username} → {self.service_request} ({self.status})"
+
+
+
+class CleanerRating(models.Model):
+    cleaner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_received')
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_given')
+    service_request = models.OneToOneField(ServiceRequest, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()  # 1 to 5
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.client.username} → {self.cleaner.username} ({self.rating})"
