@@ -294,7 +294,6 @@ class DeleteCleanerRequestAPIView(APIView):
 
 
 
-
 # class ApproveCleanerRequestAPIView(APIView):
 #     permission_classes = [permissions.IsAuthenticated]
 
@@ -314,10 +313,47 @@ class DeleteCleanerRequestAPIView(APIView):
 #             service_request.status = 'taken'
 #             service_request.save()
 
-#             return Response({'detail': 'Request approved and service marked as taken.'})
+#             # Send email to client with cleaner details
+#             client_email = service_request.email
+#             cleaner = cleaner_request.from_user
+#             subject = "🏠 Cleaner Assigned for Your Booked House"
+
+#             message = f"""
+# Hello {service_request.username},
+
+# We are happy to inform you that a cleaner has been assigned to clean the house you booked.
+
+# Cleaner Details:
+# ------------------------------
+# Name: {cleaner.username}
+# Location: {cleaner_request.cleaner_location}
+# ✉️ Email: {cleaner.email}
+# 📅 Start Date: {service_request.start_date}
+# 📅 End Date: {service_request.end_date}
+
+# Status: Approved and scheduled for cleaning.
+
+# If you have any questions, feel free to reply to this email.
+
+# Thank you for using our service.
+
+# Sincerely,
+# Open Space Cleaning Team
+# """
+
+#             send_mail(
+#                 subject=subject,
+#                 message=message,
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 recipient_list=[client_email],
+#                 fail_silently=False,
+#             )
+
+#             return Response({'detail': 'Request approved, service marked as taken, and cleaner details sent to client.'})
 
 #         except CleanerRequest.DoesNotExist:
 #             return Response({'detail': 'Cleaner request not found.'}, status=404)
+
 
 
 
@@ -340,13 +376,28 @@ class ApproveCleanerRequestAPIView(APIView):
             service_request.status = 'taken'
             service_request.save()
 
-            # Send email to client with cleaner details
-            client_email = service_request.email
             cleaner = cleaner_request.from_user
-            subject = "🏠 Cleaner Assigned for Your Booked House"
+            client = service_request.user  # The user who booked the house
 
-            message = f"""
-Hello {service_request.username},
+            # Create DB notifications
+            create_notification(
+                user=cleaner,
+                title="Cleaning Request Approved",
+                message=f"Hi {cleaner.username}, your request to clean the house booked by {service_request.username} has been approved."
+            )
+
+            create_notification(
+                user=client,
+                title="Cleaner Assigned",
+                message=f"A cleaner ({cleaner.username}) has been assigned to clean your booked house."
+            )
+
+            # Send email to client with cleaner details
+            client_email = client.email
+            subject_client = "Cleaner Assigned for Your Booked House"
+
+            message_client = f"""
+Hello {client.username},
 
 We are happy to inform you that a cleaner has been assigned to clean the house you booked.
 
@@ -369,14 +420,26 @@ Open Space Cleaning Team
 """
 
             send_mail(
-                subject=subject,
-                message=message,
+                subject=subject_client,
+                message=message_client,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[client_email],
                 fail_silently=False,
             )
 
-            return Response({'detail': 'Request approved, service marked as taken, and cleaner details sent to client.'})
+            # Send email to cleaner
+            subject_cleaner = "Your Cleaning Request Approved"
+            message_cleaner = f"Hi {cleaner.username}, your cleaning request has been approved by the staff."
+
+            send_mail(
+                subject=subject_cleaner,
+                message=message_cleaner,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[cleaner.email],
+                fail_silently=False,
+            )
+
+            return Response({'detail': 'Request approved, service marked as taken, notifications sent.'})
 
         except CleanerRequest.DoesNotExist:
             return Response({'detail': 'Cleaner request not found.'}, status=404)
@@ -411,5 +474,67 @@ class CleanerRequestRejectAPIView(APIView):
 
         except CleanerRequest.DoesNotExist:
             return Response({'detail': 'Request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+def create_notification(user, title, message):
+    Notification.objects.create(user=user, title=title, message=message)
+
+
+
+class NotificationListAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MarkNotificationAsReadAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            notification = Notification.objects.get(pk=pk, user=request.user)
+            notification.is_read = True
+            notification.save()
+            return Response({'detail': 'Notification marked as read.'})
+        except Notification.DoesNotExist:
+            return Response({'detail': 'Notification not found.'}, status=404)
+        
+
+class UnreadNotificationCountAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        count = Notification.objects.filter(user=request.user, is_read=False).count()
+        return Response({'unread_count': count})
+
+
+
+class SubmitCleanerRatingAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        cleaner_id = request.data.get('cleaner_id')
+        service_id = request.data.get('service_request_id')
+        rating = request.data.get('rating')
+        comment = request.data.get('comment', '')
+
+        if not all([cleaner_id, service_id, rating]):
+            return Response({'detail': 'Missing data'}, status=400)
+
+        cleaner = User.objects.get(id=cleaner_id)
+        service = ServiceRequest.objects.get(id=service_id)
+
+        CleanerRating.objects.create(
+            cleaner=cleaner,
+            client=request.user,
+            service_request=service,
+            rating=rating,
+            comment=comment
+        )
+
+        return Response({'detail': 'Rating submitted successfully'})
 
 

@@ -146,3 +146,9 @@ class CleanerRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = CleanerRequest
         fields = ['id', 'username', 'email', 'cleaner_location', 'status', 'created_at', 'organization_location', 'service_request_username']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'is_read', 'created_at']

@@ -23,3 +23,9 @@ class CleanerRequestAdmin(admin.ModelAdmin):
     list_display = ('from_user', 'to_user', 'service_request', 'cleaner_location', 'username', 'email')
     search_fields = ('from_user', 'to_user', 'service_request', 'username')
 admin.site.register(CleanerRequest, CleanerRequestAdmin)
+
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'message', 'is_read', 'created_at')
+    search_fields = ('user', 'message')
+admin.site.register(Notification, NotificationAdmin)
