@@ -16,22 +16,26 @@ from django.contrib.auth.password_validation import validate_password
 
 
 class RegisterCleanerAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # only staff can register cleaners?
 
     def post(self, request):
-        if request.user.role != 'staff':
-            return Response({"error": "Only staff can register cleaners."}, status=403)
-
-        data = request.data.copy()
-        data['registered_by'] = request.user.id  # This will be passed manually if your model allows
-
-        serializer = RegisterCleanerSerializer(data=data)
+        serializer = RegisterCleanerSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(registered_by=request.user)
-            return Response({"success": "Cleaner registered successfully"}, status=status.HTTP_201_CREATED)
+            data = serializer.validated_data
+            if data['password'] != data['passwordConfirm']:
+                return Response({'detail': 'Passwords must match.'}, status=400)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user = CustomUser(
+                username=data['username'], 
+                email=data['email'], 
+                role='is_cleaner',
+                registered_by=request.user
+            )
+            user.set_password(data['password'])
+            user.save()
+            return Response({'detail': 'Cleaner registered.'}, status=201)
 
+        return Response(serializer.errors, status=400)
 
 class RegisterOrganizationView(APIView):
     # Only allow authenticated users to register organizations
