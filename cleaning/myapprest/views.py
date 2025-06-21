@@ -638,3 +638,38 @@ class CleanerReportRatingAPIView(APIView):
         report.client_rating = int(rating)
         report.save()
         return Response({'detail': 'Rating saved successfully'})
+
+
+
+# class DashboardStatsAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get(self, request):
+#         total_organizations = Organization.objects.count()
+#         total_requests = ServiceRequest.objects.count()
+
+#         return Response({
+#             "total_organizations": total_organizations,
+#             "total_service_requests": total_requests
+#         })
+
+
+class StaffDashboardStatsAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        staff_user = request.user
+
+        # Get organizations registered by this staff
+        staff_organizations = Organization.objects.filter(user=staff_user)
+        total_organizations = staff_organizations.count()
+
+        # Get service requests for those organizations
+        total_service_requests = ServiceRequest.objects.filter(
+            organization__in=staff_organizations
+        ).count()
+
+        return Response({
+            "total_organizations": total_organizations,
+            "total_service_requests": total_service_requests
+        })
