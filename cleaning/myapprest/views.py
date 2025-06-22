@@ -640,20 +640,6 @@ class CleanerReportRatingAPIView(APIView):
         return Response({'detail': 'Rating saved successfully'})
 
 
-
-# class DashboardStatsAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def get(self, request):
-#         total_organizations = Organization.objects.count()
-#         total_requests = ServiceRequest.objects.count()
-
-#         return Response({
-#             "total_organizations": total_organizations,
-#             "total_service_requests": total_requests
-#         })
-
-
 class StaffDashboardStatsAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -673,3 +659,121 @@ class StaffDashboardStatsAPIView(APIView):
             "total_organizations": total_organizations,
             "total_service_requests": total_service_requests
         })
+
+
+
+# class ServiceRequestActionAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def post(self, request, pk):
+#         try:
+#             service_request = ServiceRequest.objects.get(pk=pk)
+#         except ServiceRequest.DoesNotExist:
+#             return Response({'error': 'Request not found'}, status=404)
+
+#         action = request.data.get('action')
+
+#         if action == 'accept':
+#             service_request.status = 'taken'
+#             service_request.save()
+
+#             # Send email
+#             send_mail(
+#                 subject='Request Accepted',
+#                 message='Your cleaning service request has been accepted.',
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 recipient_list=[service_request.email],
+#                 fail_silently=False
+#             )
+
+#             return Response({'success': 'Request accepted and email sent'})
+
+#         elif action == 'reject':
+#             service_request.status = 'rejected'
+#             service_request.save()
+
+#             send_mail(
+#                 subject='Request Rejected',
+#                 message='We regret to inform you that your request was rejected.',
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 recipient_list=[service_request.email],
+#                 fail_silently=False
+#             )
+
+#             return Response({'success': 'Request rejected and email sent'})
+
+#         elif action == 'delete':
+#             if service_request.status in ['taken', 'rejected']:
+#                 service_request.delete()
+#                 return Response({'success': 'Request deleted'})
+#             else:
+#                 return Response({'error': 'Can only delete accepted or rejected requests'}, status=400)
+
+#         return Response({'error': 'Invalid action'}, status=400)
+
+
+
+class ServiceRequestActionAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        action = request.data.get('action')
+        try:
+            service_request = ServiceRequest.objects.get(pk=pk)
+        except ServiceRequest.DoesNotExist:
+            return Response({'error': 'Request not found'}, status=404)
+
+        user = service_request.user
+
+        if action == 'accept':
+            service_request.status = 'taken'
+            service_request.save()
+
+            # Send email
+            send_mail(
+                subject="Your Service Request Has Been Accepted",
+                message="Hello, your request has been accepted by the staff. You will be contacted shortly.",
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True
+            )
+
+            # Create notification
+            Notification.objects.create(
+                user=user,
+                title="Request Accepted",
+                message="Your service request has been accepted."
+            )
+
+            return Response({'success': 'Request accepted and notification sent'})
+
+        elif action == 'reject':
+            service_request.status = 'rejected'
+            service_request.save()
+
+            # Send email
+            send_mail(
+                subject="Your Service Request Was Rejected",
+                message="We regret to inform you that your service request was rejected.",
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True
+            )
+
+            # Create notification
+            Notification.objects.create(
+                user=user,
+                title="Request Rejected",
+                message="Your service request has been rejected."
+            )
+
+            return Response({'success': 'Request rejected and notification sent'})
+
+        elif action == 'delete':
+            if service_request.status in ['taken', 'rejected']:
+                service_request.delete()
+                return Response({'success': 'Request deleted'})
+            else:
+                return Response({'error': 'Only taken or rejected requests can be deleted'}, status=400)
+
+        return Response({'error': 'Invalid action'}, status=400)

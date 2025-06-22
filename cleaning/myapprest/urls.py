@@ -29,4 +29,5 @@ urlpatterns = [
     path('cleaning-reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-cleaner-report'),
     path('staff/cleaners/', StaffCleanersAPIView.as_view(), name='staff-cleaners'),
     path('dashboard-stats/', StaffDashboardStatsAPIView.as_view(), name='dashboard-stats'),
+    path('service-request/<int:pk>/action/', ServiceRequestActionAPIView.as_view(), name='service-request-action'),
 ]

@@ -29,8 +29,9 @@ class Organization(models.Model):
 
 class ServiceRequest(models.Model):
     STATUS_CHOICES = [
-        ('available', 'available'),
+        ('available', 'Available'),
         ('taken', 'Taken'),
+        ('rejected', 'Rejected'),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
