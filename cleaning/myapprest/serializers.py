@@ -5,12 +5,26 @@ from django.contrib.auth.password_validation import validate_password
 
 
 
+# class RegisterCleanerSerializer(serializers.Serializer):
+#     username = serializers.CharField()
+#     email = serializers.EmailField()
+#     password = serializers.CharField(write_only=True)
+#     passwordConfirm = serializers.CharField(write_only=True)
+#     role = serializers.ChoiceField(choices=['is_cleaner'], default='is_cleaner')
+
+
 class RegisterCleanerSerializer(serializers.Serializer):
     username = serializers.CharField()
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     passwordConfirm = serializers.CharField(write_only=True)
     role = serializers.ChoiceField(choices=['is_cleaner'], default='is_cleaner')
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username already exists.")
+        return value
+
 
 class RegisterOrganizationSerializer(serializers.ModelSerializer):
     services = serializers.ListField(

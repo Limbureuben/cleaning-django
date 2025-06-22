@@ -12,30 +12,41 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import api_view # type: ignore
 from django.core.mail import send_mail, BadHeaderError
 from django.contrib.auth.password_validation import validate_password
+from django.db import IntegrityError
 
 
 
 class RegisterCleanerAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]  # only staff can register cleaners?
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         serializer = RegisterCleanerSerializer(data=request.data)
         if serializer.is_valid():
             data = serializer.validated_data
+
             if data['password'] != data['passwordConfirm']:
-                return Response({'detail': 'Passwords must match.'}, status=400)
+                return Response({'detail': 'Passwords must match.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = CustomUser(
-                username=data['username'], 
-                email=data['email'], 
-                role='is_cleaner',
-                registered_by=request.user
-            )
-            user.set_password(data['password'])
-            user.save()
-            return Response({'detail': 'Cleaner registered.'}, status=201)
 
-        return Response(serializer.errors, status=400)
+            if CustomUser.objects.filter(username=data['username']).exists():
+                return Response({'detail': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                user = CustomUser(
+                    username=data['username'],
+                    email=data['email'],
+                    role='is_cleaner',
+                    registered_by=request.user
+                )
+                user.set_password(data['password'])
+                user.save()
+                return Response({'detail': 'Cleaner registered.'}, status=status.HTTP_201_CREATED)
+
+            except IntegrityError:
+                return Response({'detail': 'A user with this username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class RegisterOrganizationView(APIView):
     # Only allow authenticated users to register organizations
@@ -662,16 +673,18 @@ class StaffDashboardStatsAPIView(APIView):
 
 
 
+
 # class ServiceRequestActionAPIView(APIView):
 #     permission_classes = [permissions.IsAuthenticated]
 
 #     def post(self, request, pk):
+#         action = request.data.get('action')
 #         try:
 #             service_request = ServiceRequest.objects.get(pk=pk)
 #         except ServiceRequest.DoesNotExist:
 #             return Response({'error': 'Request not found'}, status=404)
 
-#         action = request.data.get('action')
+#         user = service_request.user
 
 #         if action == 'accept':
 #             service_request.status = 'taken'
@@ -679,51 +692,69 @@ class StaffDashboardStatsAPIView(APIView):
 
 #             # Send email
 #             send_mail(
-#                 subject='Request Accepted',
-#                 message='Your cleaning service request has been accepted.',
-#                 from_email=settings.DEFAULT_FROM_EMAIL,
-#                 recipient_list=[service_request.email],
-#                 fail_silently=False
+#                 subject="Your Service Request Has Been Accepted",
+#                 message="Hello, your request has been accepted by the staff. You will be contacted shortly.",
+#                 from_email=None,
+#                 recipient_list=[user.email],
+#                 fail_silently=True
 #             )
 
-#             return Response({'success': 'Request accepted and email sent'})
+#             # Create notification
+#             Notification.objects.create(
+#                 user=user,
+#                 title="Request Accepted",
+#                 message="Your service request has been accepted."
+#             )
+
+#             return Response({'success': 'Request accepted and notification sent'})
 
 #         elif action == 'reject':
 #             service_request.status = 'rejected'
 #             service_request.save()
 
+#             # Send email
 #             send_mail(
-#                 subject='Request Rejected',
-#                 message='We regret to inform you that your request was rejected.',
-#                 from_email=settings.DEFAULT_FROM_EMAIL,
-#                 recipient_list=[service_request.email],
-#                 fail_silently=False
+#                 subject="Your Service Request Was Rejected",
+#                 message="We regret to inform you that your service request was rejected.",
+#                 from_email=None,
+#                 recipient_list=[user.email],
+#                 fail_silently=True
 #             )
 
-#             return Response({'success': 'Request rejected and email sent'})
+#             # Create notification
+#             Notification.objects.create(
+#                 user=user,
+#                 title="Request Rejected",
+#                 message="Your service request has been rejected."
+#             )
+
+#             return Response({'success': 'Request rejected and notification sent'})
 
 #         elif action == 'delete':
 #             if service_request.status in ['taken', 'rejected']:
 #                 service_request.delete()
 #                 return Response({'success': 'Request deleted'})
 #             else:
-#                 return Response({'error': 'Can only delete accepted or rejected requests'}, status=400)
+#                 return Response({'error': 'Only taken or rejected requests can be deleted'}, status=400)
 
 #         return Response({'error': 'Invalid action'}, status=400)
-
 
 
 class ServiceRequestActionAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        action = request.data.get('action')
         try:
             service_request = ServiceRequest.objects.get(pk=pk)
         except ServiceRequest.DoesNotExist:
             return Response({'error': 'Request not found'}, status=404)
 
         user = service_request.user
+        org = service_request.organization
+        address = org.address
+        location = org.location
+
+        action = request.data.get('action')
 
         if action == 'accept':
             service_request.status = 'taken'
@@ -731,18 +762,18 @@ class ServiceRequestActionAPIView(APIView):
 
             # Send email
             send_mail(
-                subject="Your Service Request Has Been Accepted",
-                message="Hello, your request has been accepted by the staff. You will be contacted shortly.",
+                subject="Request Accepted",
+                message=f"Your request for the house at {address}, located in {location}, has been accepted.",
                 from_email=None,
                 recipient_list=[user.email],
                 fail_silently=True
             )
 
-            # Create notification
+            # Save Notification
             Notification.objects.create(
                 user=user,
                 title="Request Accepted",
-                message="Your service request has been accepted."
+                message=f"Your request for the house at {address}, located in {location}, has been accepted."
             )
 
             return Response({'success': 'Request accepted and notification sent'})
@@ -751,20 +782,18 @@ class ServiceRequestActionAPIView(APIView):
             service_request.status = 'rejected'
             service_request.save()
 
-            # Send email
             send_mail(
-                subject="Your Service Request Was Rejected",
-                message="We regret to inform you that your service request was rejected.",
+                subject="Request Rejected",
+                message=f"Your request for the house at {address}, located in {location}, has been rejected.",
                 from_email=None,
                 recipient_list=[user.email],
                 fail_silently=True
             )
 
-            # Create notification
             Notification.objects.create(
                 user=user,
                 title="Request Rejected",
-                message="Your service request has been rejected."
+                message=f"Your request for the house at {address}, located in {location}, has been rejected."
             )
 
             return Response({'success': 'Request rejected and notification sent'})
@@ -773,7 +802,7 @@ class ServiceRequestActionAPIView(APIView):
             if service_request.status in ['taken', 'rejected']:
                 service_request.delete()
                 return Response({'success': 'Request deleted'})
-            else:
-                return Response({'error': 'Only taken or rejected requests can be deleted'}, status=400)
+            return Response({'error': 'Cannot delete a request unless it is accepted or rejected'}, status=400)
 
-        return Response({'error': 'Invalid action'}, status=400)
+        else:
+            return Response({'error': 'Invalid action'}, status=400)
