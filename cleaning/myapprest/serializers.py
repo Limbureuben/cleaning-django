@@ -2,6 +2,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers # type: ignore
 from .models import *
 from django.contrib.auth.password_validation import validate_password
+from myapp.models import *
 
 
 
@@ -190,3 +191,13 @@ class CleanerSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        
+        
+class CleanerSerializer(serializers.ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'average_rating']
+
+    def get_average_rating(self, obj):
+        return obj.get_average_rating()

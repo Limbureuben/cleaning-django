@@ -755,30 +755,30 @@ class CleanerReportRatingAPIView(APIView):
 
         service_request = report.service_request
 
-        # Only the client who made the request can rate
+        # Only client who booked the service can rate
         if request.user != service_request.user:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Prevent double rating
+        # Prevent double rating for this specific request
         if CleanerRating.objects.filter(service_request=service_request).exists():
             return Response({'detail': 'You have already rated this service'}, status=status.HTTP_400_BAD_REQUEST)
 
-        rating = request.data.get('client_rating')
+        rating = request.data.get('rating')
         comment = request.data.get('comment', '')
 
         if not rating or not (1 <= int(rating) <= 5):
             return Response({'detail': 'Invalid rating (1-5)'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Save the rating
+        # Save rating
         CleanerRating.objects.create(
-            cleaner=report.cleaner,  # get from report, not from service_request
+            cleaner=report.cleaner,
             client=request.user,
             service_request=service_request,
             rating=int(rating),
             comment=comment
         )
 
-        return Response({'detail': 'Rating submitted successfully'}, status=status.HTTP_200_OK)
+        return Response({'detail': 'Rating submitted successfully'})
 
 
 

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta, datetime
+from django.db.models import Avg
+from myapprest.models import CleanerRating
 
 
 
@@ -34,3 +36,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+    
+    def get_average_rating(self):
+        result = CleanerRating.objects.filter(cleaner=self).aggregate(avg_rating=Avg('rating'))
+        return round(result['avg_rating'] or 0, 1)
