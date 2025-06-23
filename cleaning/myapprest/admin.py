@@ -35,3 +35,9 @@ class CleaningReportAdmin(admin.ModelAdmin):
     list_display = ('cleaner', 'service_request', 'description', 'completed_at', 'client_rating', 'forwarded')
     search_fields = ('cleaner', 'service_request')
 admin.site.register(CleaningReport, CleaningReportAdmin)
+
+
+class CleanerRatingAdmin(admin.ModelAdmin):
+    list_display = ('cleaner', 'client', 'service_request', 'rating', 'created_at')
+    search_fields = ('cleaner', 'client')
+admin.site.register(CleanerRating, CleanerRatingAdmin)
