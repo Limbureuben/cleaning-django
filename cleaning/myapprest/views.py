@@ -801,6 +801,7 @@ class StaffCleaningReportsAPIView(APIView):
                 'completed_at': report.completed_at,
                 'attachment': report.attachment.url if report.attachment else None,
                 'client_rating': report.client_rating,
+                'forwarded': report.forwarded,  # Add this line in your `data` list
             }
             for report in reports
         ]
