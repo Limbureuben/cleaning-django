@@ -820,32 +820,6 @@ class StaffCleaningReportsAPIView(APIView):
         return Response({'detail': 'Report deleted'})
 
 
-# class ClientCleaningReportsAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def get(self, request):
-#         if request.user.role != 'user':
-#             return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
-
-#         reports = CleaningReport.objects.filter(
-#             service_request__user=request.user
-#         ).select_related('cleaner', 'service_request')
-
-#         data = [
-#             {
-#                 'id': report.id,
-#                 'cleaner': report.cleaner.username,
-#                 'description': report.description,
-#                 'completed_at': report.completed_at,
-#                 'attachment': report.attachment.url if report.attachment else None,
-#                 'client_rating': report.client_rating,
-#             }
-#             for report in reports
-#         ]
-#         return Response(data)
-
-
-
 class ForwardReportAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -886,3 +860,28 @@ class ClientForwardedReportsAPIView(APIView):
         ]
 
         return Response(data, status=200)
+
+
+class CleanerDashboardStatsAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # 1. Available Jobs (status='taken')
+        available_jobs = ServiceRequest.objects.filter(status='taken')
+        available_jobs_count = available_jobs.count()
+
+        # 2. Total Cleaner Requests (excluding approved)
+        total_cleaner_requests = CleanerRequest.objects.filter(from_user=user).exclude(status='approved')
+        total_cleaner_requests_count = total_cleaner_requests.count()
+
+        # 3. Total Approved Cleaner Requests
+        approved_requests = CleanerRequest.objects.filter(from_user=user, status='approved')
+        approved_requests_count = approved_requests.count()
+
+        return Response({
+            "available_jobs_count": available_jobs_count,
+            "total_cleaner_requests_count": total_cleaner_requests_count,
+            "approved_cleaner_requests_count": approved_requests_count
+        })

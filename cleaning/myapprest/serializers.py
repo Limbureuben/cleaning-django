@@ -191,9 +191,8 @@ class CleanerSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        
-        
-        
+
+
 class CleanerSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
 

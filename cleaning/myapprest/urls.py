@@ -36,5 +36,6 @@ urlpatterns = [
     path('reports/<int:pk>/forward/', ForwardReportAPIView.as_view(), name='forward-report'),
     path('reports/client/forwarded/', ClientForwardedReportsAPIView.as_view(), name='client-forwarded-reports'),
     path('reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-report'),
+    path('cleaner/dashboard-stats/', CleanerDashboardStatsAPIView.as_view(), name='cleaner-dashboard-stats'),
 
 ]
