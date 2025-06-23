@@ -764,7 +764,6 @@ class CleanerReportRatingAPIView(APIView):
             return Response({'detail': 'You have already rated this service'}, status=status.HTTP_400_BAD_REQUEST)
 
         rating = request.data.get('rating')
-        comment = request.data.get('comment', '')
 
         if not rating or not (1 <= int(rating) <= 5):
             return Response({'detail': 'Invalid rating (1-5)'}, status=status.HTTP_400_BAD_REQUEST)
@@ -775,7 +774,6 @@ class CleanerReportRatingAPIView(APIView):
             client=request.user,
             service_request=service_request,
             rating=int(rating),
-            comment=comment
         )
 
         return Response({'detail': 'Rating submitted successfully'})

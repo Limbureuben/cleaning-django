@@ -139,7 +139,6 @@ class CleanerRating(models.Model):
     client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ratings_given')
     service_request = models.OneToOneField(ServiceRequest, on_delete=models.CASCADE)
     rating = models.PositiveIntegerField()  # 1 to 5
-    comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
