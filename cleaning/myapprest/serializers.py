@@ -193,11 +193,14 @@ class CleanerSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
         
         
+        
 class CleanerSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'average_rating']
+        fields = ['id', 'username', 'average_rating']
 
     def get_average_rating(self, obj):
         return obj.get_average_rating()
+
