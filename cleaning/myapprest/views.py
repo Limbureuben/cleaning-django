@@ -116,7 +116,7 @@ class FetchToCleaner(APIView):
 
     def get(self, request):
         # Fetch all service requests with status 'booked'
-        service_requests = ServiceRequest.objects.filter(status='available')
+        service_requests = ServiceRequest.objects.filter(status='taken')
         serializer = ServiceRequestSerializer(service_requests, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -674,72 +674,6 @@ class StaffDashboardStatsAPIView(APIView):
 
 
 
-# class ServiceRequestActionAPIView(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def post(self, request, pk):
-#         action = request.data.get('action')
-#         try:
-#             service_request = ServiceRequest.objects.get(pk=pk)
-#         except ServiceRequest.DoesNotExist:
-#             return Response({'error': 'Request not found'}, status=404)
-
-#         user = service_request.user
-
-#         if action == 'accept':
-#             service_request.status = 'taken'
-#             service_request.save()
-
-#             # Send email
-#             send_mail(
-#                 subject="Your Service Request Has Been Accepted",
-#                 message="Hello, your request has been accepted by the staff. You will be contacted shortly.",
-#                 from_email=None,
-#                 recipient_list=[user.email],
-#                 fail_silently=True
-#             )
-
-#             # Create notification
-#             Notification.objects.create(
-#                 user=user,
-#                 title="Request Accepted",
-#                 message="Your service request has been accepted."
-#             )
-
-#             return Response({'success': 'Request accepted and notification sent'})
-
-#         elif action == 'reject':
-#             service_request.status = 'rejected'
-#             service_request.save()
-
-#             # Send email
-#             send_mail(
-#                 subject="Your Service Request Was Rejected",
-#                 message="We regret to inform you that your service request was rejected.",
-#                 from_email=None,
-#                 recipient_list=[user.email],
-#                 fail_silently=True
-#             )
-
-#             # Create notification
-#             Notification.objects.create(
-#                 user=user,
-#                 title="Request Rejected",
-#                 message="Your service request has been rejected."
-#             )
-
-#             return Response({'success': 'Request rejected and notification sent'})
-
-#         elif action == 'delete':
-#             if service_request.status in ['taken', 'rejected']:
-#                 service_request.delete()
-#                 return Response({'success': 'Request deleted'})
-#             else:
-#                 return Response({'error': 'Only taken or rejected requests can be deleted'}, status=400)
-
-#         return Response({'error': 'Invalid action'}, status=400)
-
-
 class ServiceRequestActionAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -806,3 +740,95 @@ class ServiceRequestActionAPIView(APIView):
 
         else:
             return Response({'error': 'Invalid action'}, status=400)
+
+
+
+
+class CleanerReportRatingAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            report = CleaningReport.objects.get(pk=pk)
+        except CleaningReport.DoesNotExist:
+            return Response({'detail': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        service_request = report.service_request
+
+        # Only the original client can rate
+        if request.user != service_request.booked_by:
+            return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Prevent double rating
+        if CleanerRating.objects.filter(service_request=service_request).exists():
+            return Response({'detail': 'You have already rated this service'}, status=status.HTTP_400_BAD_REQUEST)
+
+        rating = request.data.get('client_rating')
+        comment = request.data.get('comment', '')
+
+        if not rating or not (1 <= int(rating) <= 5):
+            return Response({'detail': 'Invalid rating (1-5)'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Save the rating
+        CleanerRating.objects.create(
+            cleaner=service_request.cleaner,
+            client=request.user,
+            service_request=service_request,
+            rating=int(rating),
+            comment=comment
+        )
+
+        return Response({'detail': 'Rating submitted successfully'}, status=status.HTTP_200_OK)
+
+
+
+
+class StaffCleaningReportsAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'staff':
+            return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        reports = CleaningReport.objects.filter(
+            service_request__organization__user=request.user  # assuming organization has user=staff
+        ).select_related('cleaner', 'service_request')
+
+        data = [
+            {
+                'id': report.id,
+                'cleaner': report.cleaner.username,
+                'client': report.service_request.booked_by.username,
+                'description': report.description,
+                'completed_at': report.completed_at,
+                'attachment': report.attachment.url if report.attachment else None,
+                'client_rating': report.client_rating,
+            }
+            for report in reports
+        ]
+        return Response(data)
+
+
+class ClientCleaningReportsAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'user':
+            return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        reports = CleaningReport.objects.filter(
+            service_request__booked_by=request.user
+        ).select_related('cleaner', 'service_request')
+
+        data = [
+            {
+                'id': report.id,
+                'cleaner': report.cleaner.username,
+                'description': report.description,
+                'completed_at': report.completed_at,
+                'attachment': report.attachment.url if report.attachment else None,
+                'client_rating': report.client_rating,
+            }
+            for report in reports
+        ]
+        return Response(data)
