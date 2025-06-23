@@ -32,5 +32,6 @@ urlpatterns = [
     path('service-request/<int:pk>/action/', ServiceRequestActionAPIView.as_view(), name='service-request-action'),
     path('reports/staff/', StaffCleaningReportsAPIView.as_view(), name='Staff-report'),
     path('reports/client/', ClientCleaningReportsAPIView.as_view(), name='Client-report'),
+    path('reports/<int:pk>/', StaffCleaningReportsAPIView.as_view(), name='staff-report-detail'),
     path('reports/<int:pk>/forward/', ForwardReportAPIView.as_view(), name='forward-report'),
 ]

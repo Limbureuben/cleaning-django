@@ -805,7 +805,18 @@ class StaffCleaningReportsAPIView(APIView):
             for report in reports
         ]
         return Response(data)
+    
+    def delete(self, request, pk):
+        try:
+            report = CleaningReport.objects.get(pk=pk)
+        except CleaningReport.DoesNotExist:
+            return Response({'detail': 'Report not found'}, status=404)
 
+        if not report.forwarded:
+            return Response({'detail': 'Cannot delete before forwarding'}, status=400)
+
+        report.delete()
+        return Response({'detail': 'Report deleted'})
 
 
 class ClientCleaningReportsAPIView(APIView):
