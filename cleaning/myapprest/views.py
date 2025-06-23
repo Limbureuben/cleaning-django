@@ -834,3 +834,16 @@ class ClientCleaningReportsAPIView(APIView):
 
 
 
+class ForwardReportAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            report = CleaningReport.objects.get(pk=pk)
+        except CleaningReport.DoesNotExist:
+            return Response({'detail': 'Report not found'}, status=404)
+
+        report.forwarded = True
+        report.save()
+        # Optionally: Notify client here
+        return Response({'detail': 'Report forwarded'})
