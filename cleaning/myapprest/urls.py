@@ -30,6 +30,6 @@ urlpatterns = [
     path('staff/cleaners/', StaffCleanersAPIView.as_view(), name='staff-cleaners'),
     path('dashboard-stats/', StaffDashboardStatsAPIView.as_view(), name='dashboard-stats'),
     path('service-request/<int:pk>/action/', ServiceRequestActionAPIView.as_view(), name='service-request-action'),
-    path('reports/staff/', StaffCleaningReportsAPIView.as_view()),
-    path('reports/client/', ClientCleaningReportsAPIView.as_view()),
+    path('reports/staff/', StaffCleaningReportsAPIView.as_view(), name='Staff-report'),
+    path('reports/client/', ClientCleaningReportsAPIView.as_view(), name='Client-report'),
 ]

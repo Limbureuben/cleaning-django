@@ -781,8 +781,6 @@ class CleanerReportRatingAPIView(APIView):
         return Response({'detail': 'Rating submitted successfully'}, status=status.HTTP_200_OK)
 
 
-
-
 class StaffCleaningReportsAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -791,14 +789,14 @@ class StaffCleaningReportsAPIView(APIView):
             return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         reports = CleaningReport.objects.filter(
-            service_request__organization__user=request.user  # assuming organization has user=staff
-        ).select_related('cleaner', 'service_request')
+            service_request__organization__user=request.user
+        ).select_related('cleaner', 'service_request', 'service_request__user')  # prefetch user (the client)
 
         data = [
             {
                 'id': report.id,
                 'cleaner': report.cleaner.username,
-                'client': report.service_request.booked_by.username,
+                'client': report.service_request.user.username,  # fixed here
                 'description': report.description,
                 'completed_at': report.completed_at,
                 'attachment': report.attachment.url if report.attachment else None,
@@ -809,6 +807,7 @@ class StaffCleaningReportsAPIView(APIView):
         return Response(data)
 
 
+
 class ClientCleaningReportsAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -817,7 +816,7 @@ class ClientCleaningReportsAPIView(APIView):
             return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         reports = CleaningReport.objects.filter(
-            service_request__booked_by=request.user
+            service_request__user=request.user
         ).select_related('cleaner', 'service_request')
 
         data = [
