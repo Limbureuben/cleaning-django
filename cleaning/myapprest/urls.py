@@ -31,7 +31,10 @@ urlpatterns = [
     path('dashboard-stats/', StaffDashboardStatsAPIView.as_view(), name='dashboard-stats'),
     path('service-request/<int:pk>/action/', ServiceRequestActionAPIView.as_view(), name='service-request-action'),
     path('reports/staff/', StaffCleaningReportsAPIView.as_view(), name='Staff-report'),
-    path('reports/client/', ClientCleaningReportsAPIView.as_view(), name='Client-report'),
+    # path('reports/client/', ClientCleaningReportsAPIView.as_view(), name='Client-report'),
     path('reports/<int:pk>/', StaffCleaningReportsAPIView.as_view(), name='staff-report-detail'),
     path('reports/<int:pk>/forward/', ForwardReportAPIView.as_view(), name='forward-report'),
+    path('reports/client/forwarded/', ClientForwardedReportsAPIView.as_view(), name='client-forwarded-reports'),
+    path('reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-report'),
+
 ]

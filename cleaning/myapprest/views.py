@@ -755,8 +755,8 @@ class CleanerReportRatingAPIView(APIView):
 
         service_request = report.service_request
 
-        # Only the original client can rate
-        if request.user != service_request.booked_by:
+        # Only the client who made the request can rate
+        if request.user != service_request.user:
             return Response({'detail': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
 
         # Prevent double rating
@@ -771,7 +771,7 @@ class CleanerReportRatingAPIView(APIView):
 
         # Save the rating
         CleanerRating.objects.create(
-            cleaner=service_request.cleaner,
+            cleaner=report.cleaner,  # get from report, not from service_request
             client=request.user,
             service_request=service_request,
             rating=int(rating),
@@ -779,6 +779,8 @@ class CleanerReportRatingAPIView(APIView):
         )
 
         return Response({'detail': 'Rating submitted successfully'}, status=status.HTTP_200_OK)
+
+
 
 
 class StaffCleaningReportsAPIView(APIView):
@@ -820,29 +822,29 @@ class StaffCleaningReportsAPIView(APIView):
         return Response({'detail': 'Report deleted'})
 
 
-class ClientCleaningReportsAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+# class ClientCleaningReportsAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        if request.user.role != 'user':
-            return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+#     def get(self, request):
+#         if request.user.role != 'user':
+#             return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
-        reports = CleaningReport.objects.filter(
-            service_request__user=request.user
-        ).select_related('cleaner', 'service_request')
+#         reports = CleaningReport.objects.filter(
+#             service_request__user=request.user
+#         ).select_related('cleaner', 'service_request')
 
-        data = [
-            {
-                'id': report.id,
-                'cleaner': report.cleaner.username,
-                'description': report.description,
-                'completed_at': report.completed_at,
-                'attachment': report.attachment.url if report.attachment else None,
-                'client_rating': report.client_rating,
-            }
-            for report in reports
-        ]
-        return Response(data)
+#         data = [
+#             {
+#                 'id': report.id,
+#                 'cleaner': report.cleaner.username,
+#                 'description': report.description,
+#                 'completed_at': report.completed_at,
+#                 'attachment': report.attachment.url if report.attachment else None,
+#                 'client_rating': report.client_rating,
+#             }
+#             for report in reports
+#         ]
+#         return Response(data)
 
 
 
@@ -859,3 +861,30 @@ class ForwardReportAPIView(APIView):
         report.save()
         # Optionally: Notify client here
         return Response({'detail': 'Report forwarded'})
+
+
+class ClientForwardedReportsAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'user':
+            return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        reports = CleaningReport.objects.filter(
+            forwarded=True,
+            service_request__user=request.user
+        ).select_related('cleaner', 'service_request')
+
+        data = [
+            {
+                'id': report.id,
+                'cleaner': report.cleaner.username,
+                'description': report.description,
+                'completed_at': report.completed_at,
+                'attachment': report.attachment.url if report.attachment else None,
+                'client_rating': report.client_rating,
+            }
+            for report in reports
+        ]
+
+        return Response(data, status=200)
