@@ -19,6 +19,7 @@ urlpatterns = [
     path('cleaner-requests/to-staff/', CleanerRequestsToStaffAPIView.as_view(), name='cleaner-requests-to-staff'),
     path('cancel-cleaner-request/<int:request_id>/', CancelCleanerRequestAPIView.as_view(), name='cancel-cleaner-request'),
     path('delete-cleaner-request/<int:pk>/', DeleteCleanerRequestAPIView.as_view(), name='delete-cleaner-request'),
+    path('cleaner-delete-request/<int:pk>/',CleanerDeleteRequestAPIView.as_view(), name="cleaner-deletion"),
     path('cleaner-requests/<int:pk>/approve/', ApproveCleanerRequestAPIView.as_view(), name='approve-cleaner-request'),
     path('cleaner-requests/<int:pk>/reject/', CleanerRequestRejectAPIView.as_view(), name='reject-cleaner-request'),
     path('notifications/', NotificationListAPIView.as_view(), name='notifications'),
@@ -37,5 +38,4 @@ urlpatterns = [
     path('reports/client/forwarded/', ClientForwardedReportsAPIView.as_view(), name='client-forwarded-reports'),
     path('reports/<int:pk>/rate/', CleanerReportRatingAPIView.as_view(), name='rate-report'),
     path('cleaner/dashboard-stats/', CleanerDashboardStatsAPIView.as_view(), name='cleaner-dashboard-stats'),
-
 ]

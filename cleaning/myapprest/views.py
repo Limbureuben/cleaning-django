@@ -386,6 +386,24 @@ class DeleteCleanerRequestAPIView(APIView):
 
 
 
+class CleanerDeleteRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            cleaner_request = CleanerRequest.objects.get(id=pk, from_user=request.user)
+            if cleaner_request.status != 'approved':
+                return Response({'detail': 'Only approved requests can be deleted.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+            cleaner_request.delete()
+            return Response({'detail': 'Request deleted successfully.'}, status=status.HTTP_200_OK)
+
+        except CleanerRequest.DoesNotExist:
+            return Response({'detail': 'Request not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
 class ApproveCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
