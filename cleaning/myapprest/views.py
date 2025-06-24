@@ -373,9 +373,14 @@ class DeleteCleanerRequestAPIView(APIView):
 
     def delete(self, request, pk):
         try:
-            cleaner_request = CleanerRequest.objects.get(id=pk, from_user=request.user)
-            if cleaner_request.status != 'cancelled':
-                return Response({'detail': 'Only cancelled requests can be deleted.'}, status=status.HTTP_400_BAD_REQUEST)
+            cleaner_request = CleanerRequest.objects.get(id=pk)
+
+            # Check if current user is the receiving staff
+            if cleaner_request.to_user != request.user:
+                return Response({'detail': 'You are not allowed to delete this request.'}, status=status.HTTP_403_FORBIDDEN)
+
+            if cleaner_request.status not in ['approved', 'cancelled']:
+                return Response({'detail': 'Only approved or cancelled requests can be deleted.'}, status=status.HTTP_400_BAD_REQUEST)
 
             cleaner_request.delete()
             return Response({'detail': 'Request deleted successfully.'}, status=status.HTTP_200_OK)
