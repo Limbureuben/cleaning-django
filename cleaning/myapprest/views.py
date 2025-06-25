@@ -425,7 +425,7 @@ class ApproveCleanerRequestAPIView(APIView):
 
             # Mark the service request as taken
             service_request = cleaner_request.service_request
-            service_request.status = 'taken'
+            service_request.status = 'approved'
             service_request.save()
 
             cleaner = cleaner_request.from_user
@@ -495,6 +495,8 @@ class ApproveCleanerRequestAPIView(APIView):
 
         except CleanerRequest.DoesNotExist:
             return Response({'detail': 'Cleaner request not found.'}, status=404)
+
+
 
 
 
