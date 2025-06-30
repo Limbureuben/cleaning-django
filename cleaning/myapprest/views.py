@@ -778,7 +778,49 @@ class CleanerReportRatingAPIView(APIView):
 
 
 
-class StaffCleaningReportsAPIView(APIView):
+# class StaffCleaningReportsAPIView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get(self, request):
+#         if request.user.role != 'staff':
+#             return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+#         reports = CleaningReport.objects.filter(
+#             service_request__organization__user=request.user
+#         ).select_related('cleaner', 'service_request', 'service_request__user')  # prefetch user (the client)
+
+#         data = [
+#             {
+#                 'id': report.id,
+#                 'cleaner': report.cleaner.username,
+#                 'client': report.service_request.user.username,  # fixed here
+#                 'description': report.description,
+#                 'completed_at': report.completed_at,
+#                 'attachment': report.attachment.url if report.attachment else None,
+#                 'client_rating': report.client_rating,
+#                 'forwarded': report.forwarded,  # Add this line in your `data` list
+#             }
+#             for report in reports
+#         ]
+#         return Response(data)
+    
+#     def delete(self, request, pk):
+#         try:
+#             report = CleaningReport.objects.get(pk=pk)
+#         except CleaningReport.DoesNotExist:
+#             return Response({'detail': 'Report not found'}, status=404)
+
+#         if not report.forwarded:
+#             return Response({'detail': 'Cannot delete before forwarding'}, status=400)
+
+#         report.delete()
+#         return Response({'detail': 'Report deleted'})
+
+
+
+
+# GET: List all
+class StaffCleaningReportsListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -787,23 +829,27 @@ class StaffCleaningReportsAPIView(APIView):
 
         reports = CleaningReport.objects.filter(
             service_request__organization__user=request.user
-        ).select_related('cleaner', 'service_request', 'service_request__user')  # prefetch user (the client)
+        ).select_related('cleaner', 'service_request', 'service_request__user')
 
         data = [
             {
                 'id': report.id,
                 'cleaner': report.cleaner.username,
-                'client': report.service_request.user.username,  # fixed here
+                'client': report.service_request.user.username,
                 'description': report.description,
                 'completed_at': report.completed_at,
                 'attachment': report.attachment.url if report.attachment else None,
                 'client_rating': report.client_rating,
-                'forwarded': report.forwarded,  # Add this line in your `data` list
+                'forwarded': report.forwarded,
             }
             for report in reports
         ]
         return Response(data)
-    
+
+# DELETE: One item
+class StaffCleaningReportDeleteAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def delete(self, request, pk):
         try:
             report = CleaningReport.objects.get(pk=pk)
@@ -815,6 +861,7 @@ class StaffCleaningReportsAPIView(APIView):
 
         report.delete()
         return Response({'detail': 'Report deleted'})
+
 
 
 
