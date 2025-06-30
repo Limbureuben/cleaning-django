@@ -138,35 +138,6 @@ class SendServiceRequest(APIView):
         return Response(serializer.errors, status=400)
 
 
-# class SendServiceRequest(APIView):
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def post(self, request):
-#         user = request.user
-#         data = request.data.copy()
-#         data['user'] = user.id
-#         organization_id = data.get('organization')
-
-#         if ServiceFromUserRequest.objects.filter(user=user, organization_id=organization_id).exists():
-#             return Response(
-#                 {"error": "You have already sent a request to this organization."},
-#                 status=400
-#             )
-
-#         serializer = ServiceFromUserRequestSerializer(data=data)
-#         if serializer.is_valid():
-#             service_request = serializer.save(user=user)
-            
-#             # Optionally suspend the organization after request
-#             org = service_request.organization
-#             org.status = 'suspended'
-#             org.save()
-
-#             return Response({"success": "Request sent successfully"}, status=201)
-        
-#         return Response(serializer.errors, status=400)
-
-
 
 
 class UserProfileView(APIView):
