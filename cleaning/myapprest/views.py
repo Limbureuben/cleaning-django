@@ -48,6 +48,7 @@ class RegisterCleanerAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class RegisterOrganizationView(APIView):
     # Only allow authenticated users to register organizations
     permission_classes = [permissions.IsAuthenticated]
@@ -72,6 +73,7 @@ class RegisterOrganizationView(APIView):
         organizations = Organization.objects.all()
         serializer = RegisterOrganizationSerializer(organizations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class OrganizationViewAdmin(APIView):
