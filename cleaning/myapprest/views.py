@@ -431,7 +431,6 @@ class ApproveCleanerRequestAPIView(APIView):
             cleaner = cleaner_request.from_user
             client = service_request.user
 
-            # Create DB notifications
             create_notification(
                 user=cleaner,
                 title="Cleaning Request Approved",
