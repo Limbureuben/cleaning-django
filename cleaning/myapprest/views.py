@@ -834,7 +834,6 @@ class StaffCleaningReportsAPIView(APIView):
                 'description': report.description,
                 'completed_at': report.completed_at,
                 'attachment': report.attachment.url if report.attachment else None,
-                'client_rating': report.client_rating,
                 'forwarded': report.forwarded,
             }
             for report in reports
@@ -895,7 +894,6 @@ class ClientForwardedReportsAPIView(APIView):
                 'description': report.description,
                 'completed_at': report.completed_at,
                 'attachment': report.attachment.url if report.attachment else None,
-                'client_rating': report.client_rating,
             }
             for report in reports
         ]

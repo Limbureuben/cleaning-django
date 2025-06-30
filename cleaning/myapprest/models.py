@@ -126,7 +126,6 @@ class CleaningReport(models.Model):
     description = models.TextField()
     completed_at = models.DateField()
     attachment = models.FileField(upload_to='cleaning_reports/', null=True, blank=True)
-    client_rating = models.PositiveSmallIntegerField(null=True, blank=True)  # Rating out of 5?
     forwarded = models.BooleanField(default=False)
 
     def __str__(self):

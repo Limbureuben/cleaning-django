@@ -32,7 +32,7 @@ admin.site.register(Notification, NotificationAdmin)
 
 
 class CleaningReportAdmin(admin.ModelAdmin):
-    list_display = ('cleaner', 'service_request', 'description', 'completed_at', 'client_rating', 'forwarded')
+    list_display = ('cleaner', 'service_request', 'description', 'completed_at', 'forwarded', 'attachment')
     search_fields = ('cleaner', 'service_request')
 admin.site.register(CleaningReport, CleaningReportAdmin)
 
