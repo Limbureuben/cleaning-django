@@ -60,7 +60,6 @@ class RegisterOrganizationView(APIView):
             data=request.data,
             context={ 'request': request }
         )
-
         if serializer.is_valid():
             # Save and associate the logged-in user
             serializer.save(user=request.user)
