@@ -500,7 +500,6 @@ class ApproveCleanerRequestAPIView(APIView):
 
 
 
-
 class CleanerRequestRejectAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
