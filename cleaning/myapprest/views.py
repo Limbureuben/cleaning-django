@@ -58,7 +58,7 @@ class RegisterOrganizationView(APIView):
         # Create serializer without 'user' in request.data
         serializer = RegisterOrganizationSerializer(
             data=request.data,
-            context={'request': request}
+            context={ 'request': request }
         )
 
         if serializer.is_valid():
