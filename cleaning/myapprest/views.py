@@ -79,12 +79,11 @@ class RegisterOrganizationView(APIView):
 
 class OrganizationViewAdmin(APIView):
     permission_classes = [permissions.IsAdminUser]
-
     def get(self, request):
         organizations = Organization.objects.all()
         serializer = RegisterOrganizationSerializer(organizations, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class UpdateOrganizationStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
