@@ -817,6 +817,7 @@ class StaffCleaningReportsAPIView(APIView):
         return Response({'detail': 'Report deleted'})
 
 
+
 class ForwardReportAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
