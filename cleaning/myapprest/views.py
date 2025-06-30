@@ -413,7 +413,7 @@ class ApproveCleanerRequestAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, pk):
-        try:
+        try:+
             cleaner_request = CleanerRequest.objects.get(id=pk)
 
             if cleaner_request.status != 'pending':
