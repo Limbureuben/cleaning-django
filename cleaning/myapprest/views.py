@@ -454,7 +454,7 @@ class ApproveCleanerRequestAPIView(APIView):
             We are happy to inform you that a cleaner has been assigned to clean the house you booked.
 
             Cleaner Details:
-            ------------------------------
+            -----------------------------
             Name: {cleaner.username}
             Location: {cleaner_request.cleaner_location}
             ✉️ Email: {cleaner.email}
