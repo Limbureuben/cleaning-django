@@ -429,7 +429,7 @@ class ApproveCleanerRequestAPIView(APIView):
             service_request.save()
 
             cleaner = cleaner_request.from_user
-            client = service_request.user  # The user who booked the house
+            client = service_request.user
 
             # Create DB notifications
             create_notification(
