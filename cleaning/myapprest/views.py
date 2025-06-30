@@ -820,16 +820,11 @@ class CleanerReportRatingAPIView(APIView):
 
 
 # GET: List all
-class StaffCleaningReportsListAPIView(APIView):
+class StaffCleaningReportsAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        if request.user.role != 'staff':
-            return Response({'detail': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
-
-        reports = CleaningReport.objects.filter(
-            service_request__organization__user=request.user
-        ).select_related('cleaner', 'service_request', 'service_request__user')
+        reports = CleaningReport.objects.all().select_related('cleaner', 'service_request', 'service_request__user')
 
         data = [
             {
@@ -845,6 +840,7 @@ class StaffCleaningReportsListAPIView(APIView):
             for report in reports
         ]
         return Response(data)
+
 
 # DELETE: One item
 class StaffCleaningReportDeleteAPIView(APIView):
